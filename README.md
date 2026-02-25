@@ -7,6 +7,12 @@ Instead of endlessly scrolling, users explore films through interactive tools, c
 🔗 **Live Demo:**  
 https://sushanth-hebri.github.io/The-Film-Oracle/
 
+![Alt text](https://github.com/Sushanth-Hebri/The-Film-Oracle/blob/main/poster/1.png)
+![Alt text](https://github.com/Sushanth-Hebri/The-Film-Oracle/blob/main/poster/2.png)
+![Alt text](https://github.com/Sushanth-Hebri/The-Film-Oracle/blob/main/poster/3.png)
+![Alt text](https://github.com/Sushanth-Hebri/The-Film-Oracle/blob/main/poster/4.png)
+![Alt text](https://github.com/Sushanth-Hebri/The-Film-Oracle/blob/main/poster/5.png)
+
 ---
 
 ## 🚀 What Makes It Different?
