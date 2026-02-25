@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Film Oracle — Cinema Redefined</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="image.png">
+</head>
+<body>
+
+  <div class="grain-overlay"></div>
+  <div class="filmstrip-texture"></div>
+
+  <!-- ===== HEADER ===== -->
+  <header id="header">
+    <!-- Top bar: logo + utility actions -->
+    <div class="header-top">
+      <a class="logo" href="#" id="logoLink">
+        <span class="logo-eye">◉</span>
+        <span class="logo-text">THE FILM ORACLE</span>
+      </a>
+
+      <div class="header-actions">
+        <button class="search-trigger-btn" id="searchTriggerBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span>Search</span>
+          <kbd>/</kbd>
+        </button>
+
+        <div class="header-icon-group">
+          <button id="oracleBtn" class="hdr-icon-btn hdr-oracle" title="Tonight's Pick">
+            <span class="oracle-spin-icon">🎲</span>
+            <span class="hdr-btn-label">Oracle</span>
+          </button>
+
+          <button id="compareToggleBtn" class="hdr-icon-btn hdr-compare" title="Compare Films">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            <span class="hdr-btn-label">Compare</span>
+          </button>
+
+          <button id="cineScoreBtn" class="hdr-icon-btn hdr-score" title="Your CineScore">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span class="hdr-btn-label">Score</span>
+          </button>
+
+          <button id="favoritesBtn" class="hdr-icon-btn hdr-fav" title="Watchlist">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <span class="fav-count-badge" id="favCount">0</span>
+          </button>
+        </div>
+
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom bar: nav links with sliding indicator -->
+    <nav class="header-nav" id="mainNav">
+      <div class="nav-track">
+        <div class="nav-indicator" id="navIndicator"></div>
+        <a href="#hero" class="nav-link active" data-nav="home">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+          Home
+        </a>
+        <a href="#section-trending" class="nav-link" data-nav="trending">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"/></svg>
+          Trending
+        </a>
+        <a href="#section-topRated" class="nav-link" data-nav="toprated">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          Top Rated
+        </a>
+        <a href="#section-upcoming" class="nav-link" data-nav="upcoming">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+          Upcoming
+        </a>
+        <a href="#cast-explorer" class="nav-link" data-nav="cast">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
+          Cast
+        </a>
+        <a href="#world-cinema" class="nav-link" data-nav="world">
+          <span class="nav-emoji">🌍</span>
+          World
+        </a>
+        <a href="#decade-machine" class="nav-link" data-nav="decades">
+          <span class="nav-emoji">🕰</span>
+          Decades
+        </a>
+        <a href="#poster-guesser" class="nav-link nav-game" data-nav="guesser">
+          <span class="game-dot"></span>
+          Guesser
+        </a>
+        <a href="#mood-matcher" class="nav-link nav-vibe" data-nav="vibe">
+          <span class="vibe-dot"></span>
+          Vibe
+        </a>
+      </div>
+    </nav>
+
+    <!-- Mobile nav -->
+    <div class="mobile-nav hidden" id="mobileNav">
+      <div class="mobile-nav-grid">
+        <a href="#hero" class="mobile-nav-item">
+          <span class="mobile-nav-icon">🏠</span>
+          <span>Home</span>
+        </a>
+        <a href="#section-trending" class="mobile-nav-item">
+          <span class="mobile-nav-icon">🔥</span>
+          <span>Trending</span>
+        </a>
+        <a href="#section-topRated" class="mobile-nav-item">
+          <span class="mobile-nav-icon">⭐</span>
+          <span>Top Rated</span>
+        </a>
+        <a href="#section-upcoming" class="mobile-nav-item">
+          <span class="mobile-nav-icon">📅</span>
+          <span>Upcoming</span>
+        </a>
+        <a href="#cast-explorer" class="mobile-nav-item">
+          <span class="mobile-nav-icon">👥</span>
+          <span>Cast</span>
+        </a>
+        <a href="#world-cinema" class="mobile-nav-item">
+          <span class="mobile-nav-icon">🌍</span>
+          <span>World</span>
+        </a>
+        <a href="#decade-machine" class="mobile-nav-item">
+          <span class="mobile-nav-icon">🕰</span>
+          <span>Decades</span>
+        </a>
+        <a href="#poster-guesser" class="mobile-nav-item">
+          <span class="mobile-nav-icon">🎮</span>
+          <span>Guesser</span>
+        </a>
+        <a href="#mood-matcher" class="mobile-nav-item">
+          <span class="mobile-nav-icon">🌀</span>
+          <span>Vibe</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== COMPARE BAR ===== -->
+  <div id="compareBar" class="compare-bar hidden">
+    <div class="compare-bar-inner">
+      <div class="compare-slots">
+        <div class="compare-slot" id="compareSlot1">
+          <span class="compare-slot-placeholder">+ Add a film</span>
+        </div>
+        <div class="compare-vs">VS</div>
+        <div class="compare-slot" id="compareSlot2">
+          <span class="compare-slot-placeholder">+ Add a film</span>
+        </div>
+      </div>
+
+      <!-- Compare Search -->
+      <div class="compare-search-wrap">
+        <div class="compare-search-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="compareSearchInput" class="compare-search-input" placeholder="Search to compare…" autocomplete="off" spellcheck="false">
+          <button class="compare-search-clear hidden" id="compareSearchClear">✕</button>
+        </div>
+        <div class="compare-search-results hidden" id="compareSearchResults"></div>
+      </div>
+
+      <button id="compareNowBtn" class="compare-now-btn" disabled>Compare Now</button>
+      <button id="clearCompareBtn" class="compare-clear-btn">✕ Clear</button>
+    </div>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <section id="hero">
+    <!-- Sliding background panels -->
+    <div class="hero-slides" id="heroSlides"></div>
+    <div class="hero-gradient"></div>
+    <div class="hero-vignette"></div>
+
+    <!-- Main content layout -->
+    <div class="hero-layout">
+      <!-- Left: Film info -->
+      <div class="hero-content" id="heroContent">
+        <div class="hero-meta" id="heroMeta"></div>
+        <h1 class="hero-title" id="heroTitle">Loading…</h1>
+        <p class="hero-overview" id="heroOverview"></p>
+        <div class="hero-tone-words" id="heroToneWords"></div>
+        <div class="hero-genres" id="heroGenres"></div>
+        <div class="hero-actions">
+          <button class="btn-primary" id="heroDetailsBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            View Details
+          </button>
+          <button class="btn-ghost" id="heroFavBtn">
+            <svg class="hero-fav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <span id="heroFavText">Add to List</span>
+          </button>
+          <button class="btn-ghost btn-watched" id="heroWatchedBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <span id="heroWatchedText">Mark Watched</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Floating poster card -->
+      <div class="hero-poster-card" id="heroPosterCard">
+        <div class="hero-poster-frame">
+          <img id="heroPosterImg" class="hero-poster-img" src="" alt="">
+          <div class="hero-poster-shine"></div>
+        </div>
+        <div class="hero-poster-stats" id="heroPosterStats"></div>
+      </div>
+    </div>
+
+    <!-- Bottom: Thumbnail strip carousel -->
+    <div class="hero-strip" id="heroStrip">
+      <div class="hero-strip-inner" id="heroStripInner"></div>
+      <div class="hero-strip-fade-l"></div>
+      <div class="hero-strip-fade-r"></div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ===== VIBE FILTER BAR ===== -->
+  <div class="vibe-filter-bar" id="vibeFilterBar">
+    <div class="vibe-bar-inner">
+      <span class="vibe-label">TONE FILTER</span>
+      <div class="vibe-pills" id="vibePills">
+        <button class="vibe-pill active" data-vibe="all">All Films</button>
+        <button class="vibe-pill" data-vibe="slow-burn" data-genres="18,53">🕯 Slow Burn</button>
+        <button class="vibe-pill" data-vibe="plot-twists" data-genres="53,9648">🌀 Plot Twists</button>
+        <button class="vibe-pill" data-vibe="feel-good" data-genres="35,10751">☀️ Feel Good</button>
+        <button class="vibe-pill" data-vibe="cry-fest" data-genres="18,10749">💧 Cry Fest</button>
+        <button class="vibe-pill" data-vibe="adrenaline" data-genres="28,12,53">⚡ Adrenaline</button>
+        <button class="vibe-pill" data-vibe="mind-bend" data-genres="878,9648,14">🔮 Mind-Bending</button>
+        <button class="vibe-pill" data-vibe="cozy" data-genres="35,10751,16">🧸 Cozy Night</button>
+        <button class="vibe-pill" data-vibe="epic" data-genres="12,14,28">🏔 Epic Journey</button>
+        <button class="vibe-pill" data-vibe="dark" data-genres="27,80,53">🖤 Dark & Gritty</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DIRECTOR'S CUT SPOTLIGHT ===== -->
+  <section class="directors-cut" id="directorsCut">
+    <div class="dc-inner">
+      <div class="dc-label">
+        <span class="dc-eye">◉</span>
+        <span>DIRECTOR'S CUT — HIDDEN GEM</span>
+      </div>
+      <div class="dc-content" id="dcContent">
+        <div class="dc-loading">Consulting the Oracle…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MAIN ===== -->
+  <main>
+    <section class="movie-section" id="section-trending">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag">HOT</span>
+          <h2 class="section-title">Trending <em>Today</em></h2>
+        </div>
+        <button class="see-all-btn" data-endpoint="/trending/movie/day" data-label="Trending Today">See all →</button>
+      </div>
+      <div class="row-wrap">
+        <button class="scroll-arrow left" data-target="trending">‹</button>
+        <div class="row" id="trending"></div>
+        <button class="scroll-arrow right" data-target="trending">›</button>
+      </div>
+    </section>
+
+    <section class="movie-section alt-bg" id="section-topRated">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag gold">★</span>
+          <h2 class="section-title">Top <em>Rated</em></h2>
+        </div>
+        <button class="see-all-btn" data-endpoint="/movie/top_rated" data-label="Top Rated">See all →</button>
+      </div>
+      <div class="row-wrap">
+        <button class="scroll-arrow left" data-target="topRated">‹</button>
+        <div class="row" id="topRated"></div>
+        <button class="scroll-arrow right" data-target="topRated">›</button>
+      </div>
+    </section>
+
+    <section class="movie-section" id="section-upcoming">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag teal">SOON</span>
+          <h2 class="section-title">Coming <em>Soon</em></h2>
+        </div>
+        <button class="see-all-btn" data-endpoint="/movie/upcoming" data-label="Coming Soon">See all →</button>
+      </div>
+      <div class="row-wrap">
+        <button class="scroll-arrow left" data-target="upcoming">‹</button>
+        <div class="row" id="upcoming"></div>
+        <button class="scroll-arrow right" data-target="upcoming">›</button>
+      </div>
+    </section>
+
+    <section class="movie-section alt-bg" id="section-nowPlaying">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag red">LIVE</span>
+          <h2 class="section-title">Now <em>Playing</em></h2>
+        </div>
+        <button class="see-all-btn" data-endpoint="/movie/now_playing" data-label="Now Playing">See all →</button>
+      </div>
+      <div class="row-wrap">
+        <button class="scroll-arrow left" data-target="nowPlaying">‹</button>
+        <div class="row" id="nowPlaying"></div>
+        <button class="scroll-arrow right" data-target="nowPlaying">›</button>
+      </div>
+    </section>
+
+    <!-- ===== CAST EXPLORER ===== -->
+    <section class="cast-explorer-section" id="cast-explorer">
+      <div class="cast-explorer-inner">
+        <div class="cast-explorer-header">
+          <span class="section-tag gold">★ CAST</span>
+          <h2 class="section-title">Cast <em>Explorer</em></h2>
+          <p class="cast-explorer-sub">Add one or more actor names. We'll find films where they appear together.</p>
+        </div>
+
+        <div class="cast-input-area">
+          <div class="cast-chips-wrap" id="castChipsWrap">
+            <div class="cast-search-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="castSearchInput" class="cast-search-input" placeholder="Type an actor name and press Enter…" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="cast-autocomplete hidden" id="castAutocomplete"></div>
+          </div>
+          <div class="cast-active-chips" id="castActiveChips"></div>
+          <div class="cast-actions">
+            <button id="castFindBtn" class="cast-find-btn" disabled>Find Films</button>
+            <button id="castClearBtn" class="cast-clear-btn hidden">Clear All</button>
+          </div>
+        </div>
+
+        <div class="cast-results hidden" id="castResults">
+          <div class="cast-results-label" id="castResultsLabel"></div>
+          <div class="row-wrap">
+            <button class="scroll-arrow left" data-target="castMovies">‹</button>
+            <div class="row" id="castMovies"></div>
+            <button class="scroll-arrow right" data-target="castMovies">›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WORLD CINEMA ===== -->
+    <section class="world-cinema-section" id="world-cinema">
+      <div class="world-cinema-inner">
+        <div class="section-header" style="padding:0 0 24px;">
+          <div class="section-title-wrap">
+            <span class="section-tag teal">🌍 WORLD</span>
+            <h2 class="section-title">World <em>Cinema</em></h2>
+          </div>
+          <div id="regionDetectBadge" class="region-detect-badge hidden"></div>
+        </div>
+        <p class="world-cinema-sub">Discover masterpieces from every corner of the globe. Your region is auto-detected, or choose a country below.</p>
+        <div class="region-flags" id="regionFlags">
+          <button class="region-flag-btn active" data-lang="en" data-region="US" data-label="🇺🇸 Hollywood">🇺🇸 Hollywood</button>
+          <button class="region-flag-btn" data-lang="ko" data-region="KR" data-label="🇰🇷 Korean">🇰🇷 Korean</button>
+          <button class="region-flag-btn" data-lang="ja" data-region="JP" data-label="🇯🇵 Japanese">🇯🇵 Japanese</button>
+          <button class="region-flag-btn" data-lang="fr" data-region="FR" data-label="🇫🇷 French">🇫🇷 French</button>
+          <button class="region-flag-btn" data-lang="hi" data-region="IN" data-label="🇮🇳 Bollywood">🇮🇳 Bollywood</button>
+          <button class="region-flag-btn" data-lang="es" data-region="ES" data-label="🇪🇸 Spanish">🇪🇸 Spanish</button>
+          <button class="region-flag-btn" data-lang="it" data-region="IT" data-label="🇮🇹 Italian">🇮🇹 Italian</button>
+          <button class="region-flag-btn" data-lang="zh" data-region="CN" data-label="🇨🇳 Chinese">🇨🇳 Chinese</button>
+          <button class="region-flag-btn" data-lang="de" data-region="DE" data-label="🇩🇪 German">🇩🇪 German</button>
+          <button class="region-flag-btn" data-lang="pt" data-region="BR" data-label="🇧🇷 Brazilian">🇧🇷 Brazilian</button>
+          <button class="region-flag-btn" data-lang="tr" data-region="TR" data-label="🇹🇷 Turkish">🇹🇷 Turkish</button>
+          <button class="region-flag-btn" data-lang="ru" data-region="RU" data-label="🇷🇺 Russian">🇷🇺 Russian</button>
+        </div>
+        <div class="world-cinema-results">
+          <div class="world-cinema-results-label" id="worldCinemaLabel">Hollywood · Most Popular</div>
+          <div class="row-wrap">
+            <button class="scroll-arrow left" data-target="worldCinemaRow">‹</button>
+            <div class="row" id="worldCinemaRow"></div>
+            <button class="scroll-arrow right" data-target="worldCinemaRow">›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DECADE TIME MACHINE ===== -->
+    <section class="decade-section" id="decade-machine">
+      <div class="decade-inner">
+        <div class="section-header" style="padding:0 0 24px;">
+          <div class="section-title-wrap">
+            <span class="section-tag gold">🕰 ERA</span>
+            <h2 class="section-title">Decade <em>Time Machine</em></h2>
+          </div>
+        </div>
+        <p class="decade-sub">Travel through cinema history. Pick an era and dive into its defining films.</p>
+        <div class="decade-pills" id="decadePills">
+          <button class="decade-pill" data-decade="1950" data-label="The 50s · Golden Age">1950s</button>
+          <button class="decade-pill" data-decade="1960" data-label="The 60s · Counterculture">1960s</button>
+          <button class="decade-pill" data-decade="1970" data-label="The 70s · New Hollywood">1970s</button>
+          <button class="decade-pill" data-decade="1980" data-label="The 80s · Blockbuster Era">1980s</button>
+          <button class="decade-pill active" data-decade="1990" data-label="The 90s · Indie Revolution">1990s</button>
+          <button class="decade-pill" data-decade="2000" data-label="The 2000s · Digital Age">2000s</button>
+          <button class="decade-pill" data-decade="2010" data-label="The 2010s · Streaming Wars">2010s</button>
+          <button class="decade-pill" data-decade="2020" data-label="The 2020s · Now">2020s</button>
+        </div>
+        <div class="decade-results">
+          <div class="decade-results-label" id="decadeLabel">The 90s · Indie Revolution</div>
+          <div class="row-wrap">
+            <button class="scroll-arrow left" data-target="decadeRow">‹</button>
+            <div class="row" id="decadeRow"></div>
+            <button class="scroll-arrow right" data-target="decadeRow">›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== POSTER GUESSER GAME ===== -->
+    <section class="guesser-section" id="poster-guesser">
+      <div class="guesser-inner">
+        <div class="section-header" style="padding:0 0 8px;">
+          <div class="section-title-wrap">
+            <span class="section-tag purple">🎮 GAME</span>
+            <h2 class="section-title">Poster <em>Guesser</em></h2>
+          </div>
+          <div class="guesser-score-wrap">
+            <span class="guesser-score-label">STREAK</span>
+            <span class="guesser-streak" id="guesserStreak">0</span>
+          </div>
+        </div>
+        <p class="guesser-sub">Can you guess the film from a blurred poster? The Oracle reveals it one step at a time.</p>
+        <div class="guesser-arena" id="guesserArena">
+          <div class="guesser-poster-wrap">
+            <img id="guesserPoster" class="guesser-poster" src="" alt="Mystery Film">
+            <div class="guesser-blur-overlay" id="guesserBlurOverlay"></div>
+            <div class="guesser-reveal-bar">
+              <div class="guesser-reveal-progress" id="guesserRevealProgress"></div>
+            </div>
+          </div>
+          <div class="guesser-right">
+            <div class="guesser-hint-box" id="guesserHintBox">
+              <div class="guesser-hint-label">HINTS UNLOCKED</div>
+              <div class="guesser-hints" id="guesserHints"></div>
+            </div>
+            <div class="guesser-options" id="guesserOptions"></div>
+            <div class="guesser-feedback hidden" id="guesserFeedback"></div>
+            <div class="guesser-actions">
+              <button class="guesser-reveal-btn" id="guesserRevealBtn">🔍 Reveal a Hint (-1pt)</button>
+              <button class="guesser-skip-btn" id="guesserSkipBtn">⏭ Skip Film</button>
+            </div>
+          </div>
+        </div>
+        <div class="guesser-loading hidden" id="guesserLoading">
+          <div class="search-spinner"></div>
+          <span>Loading next film…</span>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="mood-section" id="mood-matcher">
+      <div class="mood-inner">
+        <div class="mood-header">
+          <span class="section-tag purple">ORACLE EXCLUSIVE</span>
+          <h2 class="mood-title">Vibe <em>Matcher</em></h2>
+          <p class="mood-subtitle">How are you feeling right now? We'll find the perfect film for this exact moment.</p>
+        </div>
+        <div class="mood-grid" id="moodGrid">
+          <button class="mood-btn" data-genres="35,10751" data-label="Happy & Uplifted"><span class="mood-emoji">😄</span><span class="mood-name">Happy</span><span class="mood-desc">Light, fun, uplifting</span></button>
+          <button class="mood-btn" data-genres="18" data-label="Melancholic & Reflective"><span class="mood-emoji">🌧️</span><span class="mood-name">Melancholy</span><span class="mood-desc">Deep, emotional, poetic</span></button>
+          <button class="mood-btn" data-genres="28,53" data-label="Thrilled & On Edge"><span class="mood-emoji">⚡</span><span class="mood-name">Thrilled</span><span class="mood-desc">Pulse-racing, intense</span></button>
+          <button class="mood-btn" data-genres="10749" data-label="Romantic & Warm"><span class="mood-emoji">🌹</span><span class="mood-name">Romantic</span><span class="mood-desc">Heartwarming, tender</span></button>
+          <button class="mood-btn" data-genres="878,9648" data-label="Curious & Mind-blown"><span class="mood-emoji">🔭</span><span class="mood-name">Curious</span><span class="mood-desc">Mind-bending, cerebral</span></button>
+          <button class="mood-btn" data-genres="27" data-label="Want to be Scared"><span class="mood-emoji">👻</span><span class="mood-name">Scared</span><span class="mood-desc">Creepy, suspenseful</span></button>
+          <button class="mood-btn" data-genres="36,99" data-label="Inspired & Motivated"><span class="mood-emoji">🏆</span><span class="mood-name">Inspired</span><span class="mood-desc">True stories, triumphs</span></button>
+          <button class="mood-btn" data-genres="12,14" data-label="Adventurous & Epic"><span class="mood-emoji">🗺️</span><span class="mood-name">Adventurous</span><span class="mood-desc">Epic journeys, fantasy</span></button>
+        </div>
+        <div class="mood-results hidden" id="moodResults">
+          <div class="mood-results-label" id="moodResultsLabel"></div>
+          <div class="row-wrap">
+            <button class="scroll-arrow left" data-target="moodMovies">‹</button>
+            <div class="row" id="moodMovies"></div>
+            <button class="scroll-arrow right" data-target="moodMovies">›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo footer-logo-text"><span class="logo-eye">◉</span> THE FILM ORACLE</span>
+        <p class="footer-tagline">The world's best movie explorer. Built for the obsessed.</p>
+        <p class="footer-credit">Made with ♥ and Claude by <strong>Sushanth</strong></p>
+        <p class="footer-powered">Powered by <strong>TMDB</strong></p>
+      </div>
+      <div class="footer-links-grid">
+        <div class="footer-col">
+          <div class="footer-col-head">Discover</div>
+          <a href="#hero">Home</a>
+          <a href="#section-trending">Trending</a>
+          <a href="#section-topRated">Top Rated</a>
+          <a href="#section-upcoming">Upcoming</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-head">Features</div>
+          <a href="#cast-explorer">Cast Explorer</a>
+          <a href="#world-cinema">World Cinema</a>
+          <a href="#decade-machine">Time Machine</a>
+          <a href="#poster-guesser">Guesser Game</a>
+          <a href="#mood-matcher">Vibe Match</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 The Film Oracle</span>
+      <span class="footer-dot">·</span>
+      <span>Data provided by TMDB</span>
+    </div>
+  </footer>
+
+  <!-- ===== TOAST NOTIFICATIONS ===== -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- ===== BACK TO TOP ===== -->
+  <button id="backToTop" class="back-to-top" title="Back to top" aria-label="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
+
+  <!-- ===== STAR RATING MODAL ===== -->
+  <div id="ratingModal" class="rating-modal hidden">
+    <div class="rating-backdrop" id="ratingBackdrop"></div>
+    <div class="rating-panel">
+      <div class="rating-poster-col" id="ratingPosterCol"></div>
+      <div class="rating-content-col">
+        <div class="rating-film-title" id="ratingFilmTitle">—</div>
+        <div class="rating-subtitle">Your personal rating</div>
+        <div class="star-picker" id="starPicker">
+          <button class="star-btn" data-v="1">★</button>
+          <button class="star-btn" data-v="2">★</button>
+          <button class="star-btn" data-v="3">★</button>
+          <button class="star-btn" data-v="4">★</button>
+          <button class="star-btn" data-v="5">★</button>
+        </div>
+        <div class="rating-desc" id="ratingDesc">Hover to rate</div>
+        <div class="rating-btns">
+          <button class="rating-save" id="ratingSaveBtn">Save Rating</button>
+          <button class="rating-clear" id="ratingClearBtn">Clear</button>
+          <button class="rating-cancel" id="ratingCancelBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WATCHLIST PANEL ===== -->
+  <div id="favPanel" class="fav-panel hidden">
+    <div class="fav-header">
+      <div class="fav-header-row">
+        <h3>My Watchlist</h3>
+        <button id="closeFav" class="icon-close-btn">✕</button>
+      </div>
+      <div class="fav-progress-wrap">
+        <div class="fav-progress-bar"><div class="fav-progress-fill" id="favProgressFill"></div></div>
+        <div class="fav-progress-label" id="favProgressLabel">0 / 0 watched</div>
+      </div>
+      <div class="fav-tabs">
+        <button class="fav-tab active" data-tab="all">All</button>
+        <button class="fav-tab" data-tab="unwatched">To Watch</button>
+        <button class="fav-tab" data-tab="watched">Watched</button>
+      </div>
+      <div class="fav-sort-row">
+        <span class="fav-sort-label">Sort:</span>
+        <button class="fav-sort-btn active" data-sort="added">Added</button>
+        <button class="fav-sort-btn" data-sort="title">A–Z</button>
+        <button class="fav-sort-btn" data-sort="year">Year</button>
+      </div>
+    </div>
+    <div id="favList" class="fav-list"></div>
+  </div>
+  <div id="favOverlay" class="overlay-backdrop hidden"></div>
+
+  <!-- ===== CINESCORE PANEL ===== -->
+  <div id="cineScorePanel" class="cinepanel hidden">
+    <div class="cinepanel-header">
+      <h3><span class="logo-eye">◉</span> Your CineScore</h3>
+      <button id="closeCineScore" class="icon-close-btn">✕</button>
+    </div>
+    <div id="cineScoreBody" class="cinepanel-body">
+      <div class="cs-tagline" id="csTagline">Your taste profile is evolving…</div>
+      <div class="cs-genres" id="csGenres"></div>
+      <div class="cs-stats" id="csStats"></div>
+    </div>
+  </div>
+  <div id="cineScoreOverlay" class="overlay-backdrop hidden"></div>
+
+  <!-- ===== MOVIE DETAIL MODAL (DUAL PANE) ===== -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-sheet dual-pane">
+      <button class="modal-close" id="closeModal">✕</button>
+      <div class="dual-left" id="modalBody"></div>
+      <div class="dual-right" id="modalSimilar">
+        <div class="similar-header">After Credits →</div>
+        <div class="similar-list" id="similarList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SEE ALL MODAL ===== -->
+  <div id="seeAllModal" class="modal hidden">
+    <div class="modal-backdrop" id="seeAllBackdrop"></div>
+    <div class="modal-sheet modal-sheet--wide">
+      <div class="see-all-header">
+        <h3 id="seeAllTitle"></h3>
+        <button class="modal-close" id="closeSeeAll">✕</button>
+      </div>
+      <div class="see-all-grid" id="seeAllGrid"></div>
+    </div>
+  </div>
+
+  <!-- ===== SEARCH MODAL ===== -->
+  <div id="searchModal" class="search-modal hidden" role="dialog" aria-modal="true">
+    <div class="search-modal-backdrop" id="searchModalBackdrop"></div>
+    <div class="search-modal-panel">
+      <div class="search-modal-input-row">
+        <svg class="search-modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search" class="search-modal-input" placeholder="Search films, directors, actors…" autocomplete="off" spellcheck="false">
+        <button class="search-modal-clear hidden" id="searchClear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        <button class="search-modal-close-btn" id="searchModalClose"><span>ESC</span></button>
+      </div>
+      <div class="search-modal-body" id="searchModalBody">
+        <div class="search-empty-state" id="searchEmptyState">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <p>Consult the Oracle</p>
+          <span>Search by title, actor, or genre</span>
+        </div>
+        <div class="search-results-list hidden" id="searchResultsList"></div>
+        <div class="search-loading hidden" id="searchLoading"><div class="search-spinner"></div><span>Searching…</span></div>
+        <div class="search-no-results hidden" id="searchNoResults">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <p id="searchNoResultsText">No results found</p>
+          <span>Try a different title or keyword</span>
+        </div>
+      </div>
+      <div class="search-modal-footer">
+        <div class="search-footer-hint"><kbd>↑↓</kbd> Navigate &nbsp;<kbd>↵</kbd> Open &nbsp;<kbd>ESC</kbd> Close</div>
+        <div class="search-footer-count hidden" id="searchFooterCount"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ORACLE ROULETTE ===== -->
+  <div id="oracleModal" class="oracle-modal hidden">
+    <div class="oracle-backdrop" id="oracleBackdrop"></div>
+    <div class="oracle-panel">
+      <div class="oracle-eye-large">◉</div>
+      <div class="oracle-title">Tonight's Pick</div>
+      <div class="oracle-reel" id="oracleReel">
+        <div class="oracle-spinning" id="oracleSpinText">Consulting the Oracle…</div>
+      </div>
+      <div class="oracle-result hidden" id="oracleResult"></div>
+      <button class="oracle-spin-btn" id="oracleSpinBtn">SPIN THE REEL</button>
+      <button class="oracle-close" id="oracleClose">✕</button>
+    </div>
+  </div>
+
+  <!-- ===== COMPARE MODAL ===== -->
+  <div id="compareModal" class="modal hidden">
+    <div class="modal-backdrop" id="compareBackdrop"></div>
+    <div class="modal-sheet compare-sheet">
+      <button class="modal-close" id="closeCompare">✕</button>
+      <h2 class="compare-modal-title">HEAD TO HEAD</h2>
+      <div class="compare-grid" id="compareGrid"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
