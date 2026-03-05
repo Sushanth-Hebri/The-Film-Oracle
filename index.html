@@ -32,6 +32,11 @@
         </button>
 
         <div class="header-icon-group">
+          <button id="themeToggleBtn" class="hdr-icon-btn hdr-theme" title="Toggle Theme">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span class="hdr-btn-label">Theme</span>
+          </button>
+
           <button id="oracleBtn" class="hdr-icon-btn hdr-oracle" title="Tonight's Pick">
             <span class="oracle-spin-icon">🎲</span>
             <span class="hdr-btn-label">Oracle</span>
@@ -40,6 +45,11 @@
           <button id="compareToggleBtn" class="hdr-icon-btn hdr-compare" title="Compare Films">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
             <span class="hdr-btn-label">Compare</span>
+          </button>
+
+          <button id="shortcutsBtn" class="hdr-icon-btn hdr-shortcuts" title="Keyboard Shortcuts">
+            <kbd style="font-size:11px;background:none;border:none;color:inherit;">?</kbd>
+            <span class="hdr-btn-label">Keys</span>
           </button>
 
           <button id="cineScoreBtn" class="hdr-icon-btn hdr-score" title="Your CineScore">
@@ -95,10 +105,37 @@
           <span class="game-dot"></span>
           Guesser
         </a>
+        <a href="#hidden-gems" class="nav-link" data-nav="gems">
+          <span class="nav-emoji">💎</span>
+          Gems
+        </a>
+        <a href="#diary-section" class="nav-link nav-diary" data-nav="diary">
+          <span class="nav-emoji">📓</span>
+          Diary
+        </a>
+        <a href="#recently-viewed" class="nav-link" data-nav="recent">
+          <span class="nav-emoji">🕐</span>
+          Recent
+        </a>
+        <a href="#stats-section" class="nav-link" data-nav="stats">
+          <span class="nav-emoji">📊</span>
+          Stats
+        </a>
         <a href="#mood-matcher" class="nav-link nav-vibe" data-nav="vibe">
           <span class="vibe-dot"></span>
           Vibe
         </a>
+        <a href="#film-dna" class="nav-link" data-nav="dna">
+          <span class="nav-emoji">🧬</span>
+          DNA
+        </a>
+        <a href="#budget-scatter" class="nav-link" data-nav="scatter">
+          <span class="nav-emoji">📈</span>
+          Data
+        </a>
+        <a href="#lang-learning" class="nav-link" data-nav="lang">
+          <span class="nav-emoji">🎓</span>
+          Learn
       </div>
     </nav>
 
@@ -140,6 +177,22 @@
         <a href="#mood-matcher" class="mobile-nav-item">
           <span class="mobile-nav-icon">🌀</span>
           <span>Vibe</span>
+        </a>
+        <a href="#hidden-gems" class="mobile-nav-item">
+          <span class="mobile-nav-icon">💎</span>
+          <span>Gems</span>
+        </a>
+        <a href="#diary-section" class="mobile-nav-item">
+          <span class="mobile-nav-icon">📓</span>
+          <span>Diary</span>
+        </a>
+        <a href="#recently-viewed" class="mobile-nav-item">
+          <span class="mobile-nav-icon">🕐</span>
+          <span>Recent</span>
+        </a>
+        <a href="#stats-section" class="mobile-nav-item">
+          <span class="mobile-nav-icon">📊</span>
+          <span>Stats</span>
         </a>
       </div>
     </div>
@@ -249,6 +302,20 @@
     </div>
   </div>
 
+  <!-- ===== RUNTIME FILTER BAR ===== -->
+  <div class="runtime-filter-bar" id="runtimeFilterBar">
+    <div class="runtime-bar-inner">
+      <span class="vibe-label">⏱ RUNTIME</span>
+      <div class="runtime-pills">
+        <button class="runtime-pill active" data-min="0" data-max="9999">Any</button>
+        <button class="runtime-pill" data-min="0" data-max="90">Under 90 min</button>
+        <button class="runtime-pill" data-min="90" data-max="120">90–120 min</button>
+        <button class="runtime-pill" data-min="120" data-max="150">2–2.5 hrs</button>
+        <button class="runtime-pill" data-min="150" data-max="9999">Epic (2.5h+)</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== DIRECTOR'S CUT SPOTLIGHT ===== -->
   <section class="directors-cut" id="directorsCut">
     <div class="dc-inner">
@@ -294,6 +361,22 @@
       </div>
     </section>
 
+    <!-- ===== BECAUSE YOU WATCHED ===== -->
+    <section class="movie-section because-section" id="because-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag gold">FOR YOU</span>
+          <h2 class="section-title">Because You <em>Watched</em></h2>
+        </div>
+        <span class="because-based-on" id="becauseBasedOn"></span>
+      </div>
+      <div class="row-wrap">
+        <button class="scroll-arrow left" data-target="becauseRow">‹</button>
+        <div class="row" id="becauseRow"></div>
+        <button class="scroll-arrow right" data-target="becauseRow">›</button>
+      </div>
+    </section>
+
     <section class="movie-section" id="section-upcoming">
       <div class="section-header">
         <div class="section-title-wrap">
@@ -301,6 +384,7 @@
           <h2 class="section-title">Coming <em>Soon</em></h2>
         </div>
         <button class="see-all-btn" data-endpoint="/movie/upcoming" data-label="Coming Soon">See all →</button>
+        <span class="remind-hint" title="Click any upcoming film card to set a reminder">🔔 Reminders On</span>
       </div>
       <div class="row-wrap">
         <button class="scroll-arrow left" data-target="upcoming">‹</button>
@@ -313,7 +397,7 @@
       <div class="section-header">
         <div class="section-title-wrap">
           <span class="section-tag red">LIVE</span>
-          <h2 class="section-title">Now <em>Playing</em></h2>
+          <h2 class="section-title">Now <em>Playing</em> <span class="now-playing-locale hidden" id="nowPlayingLocale"></span></h2>
         </div>
         <button class="see-all-btn" data-endpoint="/movie/now_playing" data-label="Now Playing">See all →</button>
       </div>
@@ -321,6 +405,25 @@
         <button class="scroll-arrow left" data-target="nowPlaying">‹</button>
         <div class="row" id="nowPlaying"></div>
         <button class="scroll-arrow right" data-target="nowPlaying">›</button>
+      </div>
+    </section>
+
+    <!-- ===== RECENTLY VIEWED ===== -->
+    <section class="movie-section" id="recently-viewed">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag">HISTORY</span>
+          <h2 class="section-title">Recently <em>Viewed</em></h2>
+        </div>
+        <button class="rv-clear-btn" id="rvClearBtn">Clear History</button>
+      </div>
+      <div class="row-wrap">
+        <button class="scroll-arrow left" data-target="recentlyViewedRow">‹</button>
+        <div class="row" id="recentlyViewedRow"></div>
+        <button class="scroll-arrow right" data-target="recentlyViewedRow">›</button>
+      </div>
+      <div class="rv-empty hidden" id="rvEmpty">
+        <span>Open any film to start your history</span>
       </div>
     </section>
 
@@ -386,6 +489,7 @@
         </div>
         <div class="world-cinema-results">
           <div class="world-cinema-results-label" id="worldCinemaLabel">Hollywood · Most Popular</div>
+          <div id="worldCountryBadge" class="world-country-badge" style="display:none"></div>
           <div class="row-wrap">
             <button class="scroll-arrow left" data-target="worldCinemaRow">‹</button>
             <div class="row" id="worldCinemaRow"></div>
@@ -469,6 +573,198 @@
     </section>
 
 
+    <!-- ===== HIDDEN GEMS ===== -->
+    <section class="hidden-gems-section" id="hidden-gems">
+      <div class="hg-inner">
+        <div class="section-header" style="padding:0 0 24px;">
+          <div class="section-title-wrap">
+            <span class="section-tag teal">💎 GEMS</span>
+            <h2 class="section-title">Hidden <em>Gems</em></h2>
+          </div>
+          <button class="hg-refresh-btn" id="hgRefreshBtn">↻ Refresh</button>
+        </div>
+        <p class="hg-sub">High-rated films the world overlooked. Under 8,000 votes but over 7.8 stars — the Oracle's best-kept secrets.</p>
+        <div class="row-wrap">
+          <button class="scroll-arrow left" data-target="hiddenGemsRow">‹</button>
+          <div class="row" id="hiddenGemsRow"></div>
+          <button class="scroll-arrow right" data-target="hiddenGemsRow">›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FILM DIARY ===== -->
+    <section class="diary-section" id="diary-section">
+      <div class="diary-inner">
+        <div class="section-header" style="padding:0 0 24px;">
+          <div class="section-title-wrap">
+            <span class="section-tag gold">📓 DIARY</span>
+            <h2 class="section-title">My Film <em>Diary</em></h2>
+          </div>
+        </div>
+        <p class="diary-sub">Your personal viewing log. Add notes, dates, and reflections on every film you watch.</p>
+        <div class="diary-add-panel hidden" id="diaryAddPanel">
+          <div class="diary-form">
+            <div class="diary-form-film" id="diaryFormFilm"></div>
+            <input type="date" id="diaryDateInput" class="diary-input" />
+            <textarea id="diaryNoteInput" class="diary-textarea" placeholder="Your thoughts on this film…" rows="3"></textarea>
+            <div class="diary-form-actions">
+              <button id="diarySaveBtn" class="diary-save-btn">Save Entry</button>
+              <button id="diaryCancelBtn" class="diary-cancel-btn">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <div class="diary-entries" id="diaryEntries">
+          <div class="diary-empty" id="diaryEmpty">
+            <span>📽️</span>
+            <p>No entries yet. Mark films as watched and add diary notes from the detail modal.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STATS DASHBOARD ===== -->
+    <section class="stats-section" id="stats-section">
+      <div class="stats-inner">
+        <div class="stats-header">
+          <span class="section-tag">YOUR CINEMA</span>
+          <h2 class="section-title" style="margin:6px 0 6px">Film <em>Statistics</em></h2>
+          <p class="stats-subtitle">Your personal viewing analytics</p>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="stats-charts-row">
+          <div class="stats-chart-card">
+            <h4 class="stats-chart-title">Genre Breakdown</h4>
+            <div class="stats-genre-bars" id="statsGenreBars"></div>
+          </div>
+          <div class="stats-chart-card">
+            <h4 class="stats-chart-title">Rating Distribution</h4>
+            <div class="stats-rating-dist" id="statsRatingDist"></div>
+          </div>
+          <div class="stats-chart-card">
+            <h4 class="stats-chart-title">Watch Timeline</h4>
+            <div class="stats-timeline" id="statsTimeline"></div>
+          </div>
+        </div>
+        <div class="stats-blind-spot">
+          <div class="stats-blind-title">
+            <span>🕳️</span> Your Blind Spots
+            <span class="stats-blind-sub">Acclaimed films you haven't watched yet</span>
+          </div>
+          <div class="row-wrap" style="margin: 0 -56px">
+            <div class="row" id="blindSpotRow" style="padding: 8px 56px 12px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FILM DNA MATCHER ===== -->
+    <section class="movie-section dna-section" id="film-dna">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag teal">🧬 DNA</span>
+          <h2 class="section-title">Film <em>DNA</em> Matcher</h2>
+        </div>
+      </div>
+      <div class="dna-inner">
+        <p class="dna-sub">Pick up to 3 films you love. We'll decode their DNA and find your perfect match.</p>
+        <div class="dna-seed-area">
+          <div class="dna-seeds" id="dnaSeeds">
+            <div class="dna-seed-slot" data-slot="0"><span class="dna-slot-plus">＋</span><span class="dna-slot-label">Add film</span></div>
+            <div class="dna-seed-slot" data-slot="1"><span class="dna-slot-plus">＋</span><span class="dna-slot-label">Add film</span></div>
+            <div class="dna-seed-slot" data-slot="2"><span class="dna-slot-plus">＋</span><span class="dna-slot-label">Add film</span></div>
+          </div>
+          <button class="dna-analyze-btn" id="dnaAnalyzeBtn" disabled>🧬 Analyze DNA</button>
+        </div>
+        <div class="dna-search-wrap hidden" id="dnaSearchWrap">
+          <input type="text" id="dnaSearchInput" class="dna-search-input" placeholder="Search a film to add…" autocomplete="off">
+          <div class="dna-search-results" id="dnaSearchResults"></div>
+        </div>
+        <div class="dna-results hidden" id="dnaResults">
+          <div class="dna-profile" id="dnaProfile"></div>
+          <div class="dna-match-label">🎯 Your DNA Matches</div>
+          <div class="row-wrap">
+            <button class="scroll-arrow left" data-target="dnaMatchRow">‹</button>
+            <div class="row" id="dnaMatchRow"></div>
+            <button class="scroll-arrow right" data-target="dnaMatchRow">›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+
+
+
+
+    <!-- ===== BUDGET VS RATING SCATTER ===== -->
+    <section class="movie-section scatter-section" id="budget-scatter">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag">📈 DATA</span>
+          <h2 class="section-title">Budget vs. <em>Rating</em></h2>
+        </div>
+      </div>
+      <div class="scatter-inner">
+        <p class="scatter-sub">Does money equal quality? 100 films plotted by budget and audience rating. Click any dot to open the film.</p>
+        <div class="scatter-controls">
+          <select class="sa-filter-select" id="scatterGenreFilter">
+            <option value="">All Genres</option>
+            <option value="28">Action</option><option value="35">Comedy</option>
+            <option value="18">Drama</option><option value="27">Horror</option>
+            <option value="878">Sci-Fi</option><option value="53">Thriller</option>
+            <option value="10749">Romance</option><option value="16">Animation</option>
+          </select>
+          <button class="scatter-reload-btn" id="scatterReloadBtn">↻ Refresh</button>
+        </div>
+        <div class="scatter-canvas-wrap">
+          <canvas id="scatterCanvas"></canvas>
+          <div class="scatter-tooltip hidden" id="scatterTooltip"></div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- ===== AWARDS SEASON TRACKER ===== -->
+    
+
+
+
+    <!-- ===== LANGUAGE LEARNING MODE ===== -->
+    <section class="movie-section alt-bg lang-section" id="lang-learning">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag purple">🎓 LEARN</span>
+          <h2 class="section-title">Language <em>Cinema</em></h2>
+        </div>
+      </div>
+      <div class="lang-inner">
+        <p class="lang-sub">Learn a language through cinema. Pick your target language for top-rated films with rich translation data.</p>
+        <div class="lang-picker" id="langPicker">
+          <button class="lang-btn active" data-lang="ko" data-label="Korean">🇰🇷 Korean</button>
+          <button class="lang-btn" data-lang="ja" data-label="Japanese">🇯🇵 Japanese</button>
+          <button class="lang-btn" data-lang="fr" data-label="French">🇫🇷 French</button>
+          <button class="lang-btn" data-lang="es" data-label="Spanish">🇪🇸 Spanish</button>
+          <button class="lang-btn" data-lang="it" data-label="Italian">🇮🇹 Italian</button>
+          <button class="lang-btn" data-lang="de" data-label="German">🇩🇪 German</button>
+          <button class="lang-btn" data-lang="pt" data-label="Portuguese">🇧🇷 Portuguese</button>
+          <button class="lang-btn" data-lang="zh" data-label="Mandarin">🇨🇳 Mandarin</button>
+          <button class="lang-btn" data-lang="hi" data-label="Hindi">🇮🇳 Hindi</button>
+          <button class="lang-btn" data-lang="ru" data-label="Russian">🇷🇺 Russian</button>
+        </div>
+        <div class="lang-tips" id="langTips"></div>
+        <div class="lang-results">
+          <div class="lang-results-label" id="langResultsLabel">🇰🇷 Best Korean films to learn from</div>
+          <div class="row-wrap">
+            <button class="scroll-arrow left" data-target="langRow">‹</button>
+            <div class="row" id="langRow"></div>
+            <button class="scroll-arrow right" data-target="langRow">›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="mood-section" id="mood-matcher">
       <div class="mood-inner">
         <div class="mood-header">
@@ -522,6 +818,8 @@
           <a href="#decade-machine">Time Machine</a>
           <a href="#poster-guesser">Guesser Game</a>
           <a href="#mood-matcher">Vibe Match</a>
+          <a href="#hidden-gems">Hidden Gems</a>
+          <a href="#diary-section">Film Diary</a>
         </div>
       </div>
     </div>
@@ -586,6 +884,7 @@
         <button class="fav-sort-btn active" data-sort="added">Added</button>
         <button class="fav-sort-btn" data-sort="title">A–Z</button>
         <button class="fav-sort-btn" data-sort="year">Year</button>
+        <button class="fav-export-btn" id="favExportBtn" title="Export Watchlist">⬇ Export</button>
       </div>
     </div>
     <div id="favList" class="fav-list"></div>
@@ -600,7 +899,14 @@
     </div>
     <div id="cineScoreBody" class="cinepanel-body">
       <div class="cs-tagline" id="csTagline">Your taste profile is evolving…</div>
-      <div class="cs-genres" id="csGenres"></div>
+      <div class="cs-view-toggle">
+        <button class="cs-view-btn active" data-view="radar">◎ Radar</button>
+        <button class="cs-view-btn" data-view="bars">≡ Bars</button>
+      </div>
+      <div class="cs-radar-wrap" id="csRadarWrap">
+        <canvas id="cineRadarCanvas" width="260" height="260"></canvas>
+      </div>
+      <div class="cs-genres" id="csGenres" style="display:none;"></div>
       <div class="cs-stats" id="csStats"></div>
     </div>
   </div>
@@ -687,6 +993,133 @@
     </div>
   </div>
 
+  <!-- ===== KEYBOARD SHORTCUTS MODAL ===== -->
+  <div id="shortcutsModal" class="shortcuts-modal hidden">
+    <div class="shortcuts-backdrop" id="shortcutsBackdrop"></div>
+    <div class="shortcuts-panel">
+      <div class="shortcuts-header">
+        <h3>Keyboard Shortcuts</h3>
+        <button class="icon-close-btn" id="closeShortcuts">✕</button>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-row"><kbd>/</kbd><span>Open Search</span></div>
+        <div class="shortcut-row"><kbd>ESC</kbd><span>Close any modal</span></div>
+        <div class="shortcut-row"><kbd>↑ ↓</kbd><span>Navigate search results</span></div>
+        <div class="shortcut-row"><kbd>↵</kbd><span>Open selected film</span></div>
+        <div class="shortcut-row"><kbd>O</kbd><span>Oracle — Tonight's Pick</span></div>
+        <div class="shortcut-row"><kbd>C</kbd><span>Toggle Compare Mode</span></div>
+        <div class="shortcut-row"><kbd>W</kbd><span>Open Watchlist</span></div>
+        <div class="shortcut-row"><kbd>S</kbd><span>Open CineScore</span></div>
+        <div class="shortcut-row"><kbd>T</kbd><span>Toggle Theme</span></div>
+        <div class="shortcut-row"><kbd>?</kbd><span>This shortcut sheet</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DAILY CHALLENGE MODAL ===== -->
+  <div id="dailyChallengeModal" class="oracle-modal hidden">
+    <div class="oracle-backdrop" id="dailyChallengeBackdrop"></div>
+    <div class="oracle-panel">
+      <div class="oracle-eye-large">📅</div>
+      <div class="oracle-title">Daily Oracle</div>
+      <div class="daily-challenge-body" id="dailyChallengeBody">
+        <div class="oracle-spinning">Loading today's film…</div>
+      </div>
+      <button class="oracle-close" id="dailyChallengeClose">✕</button>
+    </div>
+  </div>
+
+  <!-- ===== DIRECTOR FILMOGRAPHY MODAL ===== -->
+  <div id="directorModal" class="modal hidden">
+    <div class="modal-backdrop" id="directorBackdrop"></div>
+    <div class="modal-sheet modal-sheet--wide">
+      <div class="see-all-header">
+        <h3 id="directorModalTitle">Filmography</h3>
+        <button class="modal-close" id="closeDirectorModal">✕</button>
+      </div>
+      <div class="director-filmography-grid" id="directorFilmographyGrid"></div>
+    </div>
+  </div>
+
+  <!-- ===== WHERE TO WATCH MODAL ===== -->
+  <div id="watchProvidersModal" class="modal hidden">
+    <div class="modal-backdrop" id="watchProvidersBackdrop"></div>
+    <div class="modal-sheet" style="max-width:540px">
+      <div class="see-all-header">
+        <h3 id="watchProvidersTitle">Where to Watch</h3>
+        <button class="modal-close" id="closeWatchProviders">✕</button>
+      </div>
+      <div id="watchProvidersBody" class="watch-providers-body"></div>
+    </div>
+  </div>
+
+  <!-- ===== COLLECTION / FRANCHISE MODAL ===== -->
+  <div id="collectionModal" class="modal hidden">
+    <div class="modal-backdrop" id="collectionBackdrop"></div>
+    <div class="modal-sheet modal-sheet--wide">
+      <div class="see-all-header">
+        <h3 id="collectionTitle">Film Series</h3>
+        <button class="modal-close" id="closeCollection">✕</button>
+      </div>
+      <div id="collectionGrid" class="see-all-grid"></div>
+    </div>
+  </div>
+
+  <!-- ===== SHARE CARD MODAL ===== -->
+  <div id="shareCardModal" class="modal hidden">
+    <div class="modal-backdrop" id="shareCardBackdrop"></div>
+    <div class="modal-sheet" style="max-width:520px">
+      <div class="see-all-header">
+        <h3>Share Film Card</h3>
+        <button class="modal-close" id="closeShareCard">✕</button>
+      </div>
+      <div class="share-card-body">
+        <canvas id="shareCanvas" class="share-canvas"></canvas>
+        <div class="share-card-actions">
+          <button class="share-download-btn" id="shareDownloadBtn">⬇ Download PNG</button>
+          <button class="share-copy-btn" id="shareCopyBtn">📋 Copy to Clipboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DIRECTOR DUEL MODAL ===== -->
+  <div id="directorDuelModal" class="modal hidden">
+    <div class="modal-backdrop" id="directorDuelBackdrop"></div>
+    <div class="modal-sheet compare-sheet" style="max-width:900px">
+      <button class="modal-close" id="closeDirDuel">✕</button>
+      <h2 class="compare-modal-title">DIRECTOR DUEL</h2>
+      <div class="dir-duel-search-row">
+        <div class="dir-duel-slot" id="duelSlotA">
+          <input type="text" class="dir-duel-input" id="duelInputA" placeholder="Director A…" autocomplete="off">
+          <div class="dir-duel-results hidden" id="duelResultsA"></div>
+          <div class="dir-duel-chosen hidden" id="duelChosenA"></div>
+        </div>
+        <div class="dir-duel-vs">VS</div>
+        <div class="dir-duel-slot" id="duelSlotB">
+          <input type="text" class="dir-duel-input" id="duelInputB" placeholder="Director B…" autocomplete="off">
+          <div class="dir-duel-results hidden" id="duelResultsB"></div>
+          <div class="dir-duel-chosen hidden" id="duelChosenB"></div>
+        </div>
+      </div>
+      <button class="compare-now-btn" id="duelFightBtn" disabled style="margin:16px auto;display:block">⚔ DUEL!</button>
+      <div id="duelGrid" class="compare-grid"></div>
+    </div>
+  </div>
+
+  <!-- ===== TRAILER GALLERY MODAL ===== -->
+  <div id="trailerGalleryModal" class="modal hidden">
+    <div class="modal-backdrop" id="trailerGalleryBackdrop"></div>
+    <div class="modal-sheet" style="max-width:860px">
+      <div class="see-all-header">
+        <h3 id="trailerGalleryTitle">Videos</h3>
+        <button class="modal-close" id="closeTrailerGallery">✕</button>
+      </div>
+      <div id="trailerGalleryBody" class="trailer-gallery-body"></div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
+
 </body>
 </html>
