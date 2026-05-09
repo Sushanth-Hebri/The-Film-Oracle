@@ -1308,6 +1308,21 @@ function startSkipPlayLoop() {
   }, HERO_PLAY_SEC * 1000);
 }
 
+// ── Sync fixed trailer overlay to exactly cover the hero section ────
+function syncTrailerBgToHero() {
+  const heroEl = document.getElementById('hero');
+  const heroBg = document.getElementById('heroTrailerBg');
+  if (!heroEl || !heroBg) return;
+  const r = heroEl.getBoundingClientRect();
+  heroBg.style.top    = r.top  + 'px';
+  heroBg.style.left   = r.left + 'px';
+  heroBg.style.width  = r.width  + 'px';
+  heroBg.style.height = r.height + 'px';
+}
+syncTrailerBgToHero();
+window.addEventListener('scroll', syncTrailerBgToHero, { passive: true });
+window.addEventListener('resize', syncTrailerBgToHero, { passive: true });
+
 // ── Start (or swap) the hero trailer ────────────────────────────────
 function startHeroTrailer(videoKey) {
   clearSkipTimer();
