@@ -5226,6 +5226,13 @@ body, .modal-sheet, .fav-panel, .cinepanel,
 .hero-trailer-bg.trailer-ready {
   opacity: 1;
 }
+/* #heroYTFrame div must fill the entire trailer background */
+#heroYTFrame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
 /* The YouTube iframe must fill the container and be centered */
 .hero-trailer-bg iframe,
 #heroYTFrame iframe {
