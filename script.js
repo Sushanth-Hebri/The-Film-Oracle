@@ -839,6 +839,8 @@ function createCard(movie, onClick) {
     .map(id => getGenreName(id)).filter(Boolean)
     .map(n => `<span class="card-genre-tag">${escHtml(n)}</span>`).join('');
 
+  const isPinned = heroMovies.some(m => m.id === movie.id);
+
   div.innerHTML = `
     <div class="card-poster">
       <img src="${poster}" alt="${escHtml(movie.title || movie.name)}" loading="lazy" onerror="this.src='${FALLBACK}'">
@@ -846,6 +848,10 @@ function createCard(movie, onClick) {
       <div class="card-actions">
         <button class="card-rate-btn" title="Rate this film">★</button>
         <button class="card-compare-btn" title="Add to Compare">⊕</button>
+        <button class="card-hero-pin-btn ${isPinned ? 'pinned' : ''}" title="${isPinned ? 'Remove from Hero' : 'Pin to Hero'}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pin-icon-add"><path d="M12 2L8 8H3l4 4-1.5 6L12 15l6.5 3L17 12l4-4h-5z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor" class="pin-icon-pinned" style="display:none"><path d="M12 2L8 8H3l4 4-1.5 6L12 15l6.5 3L17 12l4-4h-5z"/></svg>
+        </button>
       </div>
       <div class="card-overlay">
         <div class="card-play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
@@ -861,6 +867,13 @@ function createCard(movie, onClick) {
       </div>
     </div>
   `;
+
+  const pinBtn = div.querySelector('.card-hero-pin-btn');
+  syncPinBtnState(pinBtn, movie.id);
+  pinBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    toggleHeroPin(movie, pinBtn);
+  });
 
   div.querySelector('.card-compare-btn').addEventListener('click', e => {
     e.stopPropagation();
@@ -892,6 +905,99 @@ function displayMovies(movies, containerId, openFn = openModal) {
   filtered.forEach(m => el.appendChild(createCard(m, openFn)));
   // Attach bulge effect to this row
   initRowBulge(el);
+}
+
+/* =============================================
+   PIN TO HERO
+============================================= */
+let pinnedHeroIds = JSON.parse(localStorage.getItem('mv_hero_pins') || '[]');
+
+function savePinnedHero() {
+  localStorage.setItem('mv_hero_pins', JSON.stringify(pinnedHeroIds));
+}
+
+function syncPinBtnState(btn, movieId) {
+  if (!btn) return;
+  const isPinned = heroMovies.some(m => m.id === movieId);
+  btn.classList.toggle('pinned', isPinned);
+  btn.title = isPinned ? 'Remove from Hero' : 'Pin to Hero';
+  const iconAdd    = btn.querySelector('.pin-icon-add');
+  const iconPinned = btn.querySelector('.pin-icon-pinned');
+  if (iconAdd)    iconAdd.style.display    = isPinned ? 'none' : '';
+  if (iconPinned) iconPinned.style.display = isPinned ? '' : 'none';
+}
+
+function refreshAllPinBtns() {
+  document.querySelectorAll('.card-hero-pin-btn').forEach(btn => {
+    const card = btn.closest('.card');
+    if (!card) return;
+    const id = parseInt(card.dataset.movieId);
+    syncPinBtnState(btn, id);
+  });
+}
+
+function toggleHeroPin(movie, btn) {
+  const idx = heroMovies.findIndex(m => m.id === movie.id);
+  if (idx > -1) {
+    // Already pinned — remove it (but not if it's one of the original 8 base films)
+    if (heroMovies.length <= 1) { showToast('Need at least 1 film in Hero', 'info'); return; }
+    heroMovies.splice(idx, 1);
+    pinnedHeroIds = pinnedHeroIds.filter(id => id !== movie.id);
+    savePinnedHero();
+    // If we removed the active one, switch to 0
+    if (heroIdx >= heroMovies.length) heroIdx = heroMovies.length - 1;
+    rebuildHeroFull();
+    showToast(`"${movie.title}" removed from Hero`, 'info');
+  } else {
+    // Not pinned — add it
+    if (!movie.backdrop_path) {
+      showToast('No backdrop image — cannot add to Hero', 'info');
+      return;
+    }
+    heroMovies.push(movie);
+    pinnedHeroIds.push(movie.id);
+    savePinnedHero();
+    rebuildHeroFull(heroMovies.length - 1); // jump to the newly added film
+    showToast(`"${movie.title}" pinned to Hero ◉`, 'success');
+  }
+  syncPinBtnState(btn, movie.id);
+  refreshAllPinBtns();
+}
+
+function rebuildHeroFull(jumpToIdx = heroIdx) {
+  const count = heroMovies.length;
+  if (!count) return;
+
+  // Clamp jumpToIdx
+  jumpToIdx = Math.max(0, Math.min(jumpToIdx, count - 1));
+
+  // Stop current trailer & timer
+  stopHeroTrailer();
+  if (heroTimer) { clearInterval(heroTimer); heroTimer = null; }
+
+  // Rebuild background slides
+  const slidesContainer = $('heroSlides');
+  if (slidesContainer) {
+    slidesContainer.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const slide = document.createElement('div');
+      slide.className = 'hero-slide' + (i === jumpToIdx ? ' active' : '');
+      slide.style.backgroundImage = `url(${IMG(heroMovies[i].backdrop_path, 'original')})`;
+      slidesContainer.appendChild(slide);
+    }
+  }
+
+  // Rebuild thumbnail strip
+  heroIdx = jumpToIdx;
+  heroTransitionBusy = false;
+  buildThumbnailStrip(count);
+  renderHero(jumpToIdx, false);
+
+  // Start trailer for the active film
+  fetchTrailerId(heroMovies[jumpToIdx].id).then(key => startHeroTrailer(key));
+
+  // Restart auto-carousel
+  heroTimer = setInterval(() => goHero((heroIdx + 1) % heroMovies.length), 14000);
 }
 
 /* =============================================
@@ -990,10 +1096,28 @@ let heroTransitionBusy = false;
 async function loadHero() {
   try {
     const data = await apiFetch('/trending/movie/day');
-    heroMovies = (data.results || []).filter(m => m.backdrop_path && m.overview && m.poster_path);
-    if (!heroMovies.length) return;
+    const base = (data.results || []).filter(m => m.backdrop_path && m.overview && m.poster_path);
+    if (!base.length) return;
 
-    const count = Math.min(heroMovies.length, 8);
+    // Start with 8 base films
+    heroMovies = base.slice(0, 8);
+
+    // Re-attach any saved pins that aren't already in the base 8
+    if (pinnedHeroIds.length) {
+      const baseIds = new Set(heroMovies.map(m => m.id));
+      // Fetch details for pinned IDs we don't already have
+      const missing = pinnedHeroIds.filter(id => !baseIds.has(id));
+      if (missing.length) {
+        const fetched = await Promise.all(missing.map(id =>
+          apiFetch(`/movie/${id}`).catch(() => null)
+        ));
+        fetched.forEach(m => {
+          if (m && m.backdrop_path) heroMovies.push(m);
+        });
+      }
+    }
+
+    const count = heroMovies.length;
 
     // Build slide backgrounds
     const slidesContainer = $('heroSlides');
@@ -1013,7 +1137,7 @@ async function loadHero() {
     renderHero(0, false);
     // Fetch & start the first film's trailer (async, non-blocking)
     fetchTrailerId(heroMovies[0].id).then(key => startHeroTrailer(key));
-    heroTimer = setInterval(() => goHero((heroIdx + 1) % count), 14000);
+    heroTimer = setInterval(() => goHero((heroIdx + 1) % heroMovies.length), 14000);
   } catch (e) { console.error('loadHero:', e); }
 }
 
@@ -1023,32 +1147,30 @@ function buildThumbnailStrip(count) {
   strip.innerHTML = '';
   for (let i = 0; i < count; i++) {
     const m = heroMovies[i];
+    const isPinned = pinnedHeroIds.includes(m.id);
     const thumb = document.createElement('button');
-    thumb.className = 'hero-thumb' + (i === 0 ? ' active' : '');
+    thumb.className = 'hero-thumb' + (i === 0 ? ' active' : '') + (isPinned ? ' hero-thumb-pinned' : '');
     thumb.setAttribute('aria-label', `Go to slide ${i + 1}: ${m.title}`);
     thumb.innerHTML = `
       <img src="${IMG(m.backdrop_path, 'w300')}" alt="${escHtml(m.title)}" loading="lazy">
       <div class="hero-thumb-overlay"></div>
       <span class="hero-thumb-num">${String(i + 1).padStart(2, '0')}</span>
+      <span class="hero-thumb-title">${escHtml(m.title)}</span>
+      ${isPinned ? '<span class="hero-thumb-pin-badge" title="Pinned by you">◉</span>' : ''}
     `;
     thumb.addEventListener('click', () => goHero(i));
 
     // Hover → stop auto-carousel, play this film's trailer
     thumb.addEventListener('mouseenter', () => {
-      // Stop the auto-carousel
       if (heroTimer) { clearInterval(heroTimer); heroTimer = null; }
       heroHoverLock = true;
       thumb.classList.add('hover-preview');
-
-      // Show this slide immediately without full transition
       document.querySelectorAll('.hero-slide').forEach((s, si) =>
         s.classList.toggle('active', si === i)
       );
       document.querySelectorAll('.hero-thumb').forEach((t, ti) =>
         t.classList.toggle('active', ti === i)
       );
-
-      // Play this film's trailer
       fetchTrailerId(m.id).then(key => {
         if (heroHoverLock) startHeroTrailer(key);
       });
@@ -1057,20 +1179,16 @@ function buildThumbnailStrip(count) {
     thumb.addEventListener('mouseleave', () => {
       thumb.classList.remove('hover-preview');
       heroHoverLock = false;
-      // Restore the main carousel at current heroIdx
       document.querySelectorAll('.hero-slide').forEach((s, si) =>
         s.classList.toggle('active', si === heroIdx)
       );
       document.querySelectorAll('.hero-thumb').forEach((t, ti) =>
         t.classList.toggle('active', ti === heroIdx)
       );
-      // Resume trailer for the current slide
       fetchTrailerId(heroMovies[heroIdx].id).then(key => {
         if (!heroHoverLock) startHeroTrailer(key);
       });
-      // Restart the carousel timer
-      const count = Math.min(heroMovies.length, 8);
-      heroTimer = setInterval(() => goHero((heroIdx + 1) % count), 14000);
+      heroTimer = setInterval(() => goHero((heroIdx + 1) % heroMovies.length), 14000);
     });
 
     strip.appendChild(thumb);
