@@ -1048,6 +1048,9 @@ function buildThumbnailStrip(count) {
         t.classList.toggle('active', ti === i)
       );
 
+      // Update poster card and hero content to reflect the hovered film
+      renderHero(i, false);
+
       // Play this film's trailer
       fetchTrailerId(m.id).then(key => {
         if (heroHoverLock) startHeroTrailer(key);
@@ -1064,6 +1067,10 @@ function buildThumbnailStrip(count) {
       document.querySelectorAll('.hero-thumb').forEach((t, ti) =>
         t.classList.toggle('active', ti === heroIdx)
       );
+
+      // Restore poster card and hero content to current slide
+      renderHero(heroIdx, false);
+
       // Resume trailer for the current slide
       fetchTrailerId(heroMovies[heroIdx].id).then(key => {
         if (!heroHoverLock) startHeroTrailer(key);
@@ -1119,7 +1126,14 @@ function goHero(idx) {
   setTimeout(() => {
     renderHero(idx, true);
     if (content) content.classList.remove('transitioning');
-    if (posterCard) posterCard.classList.remove('transitioning');
+    if (posterCard) {
+      posterCard.classList.remove('transitioning');
+      // Force reflow so the browser re-runs the posterCardIn animation
+      void posterCard.offsetWidth;
+      posterCard.style.animation = 'none';
+      void posterCard.offsetWidth;
+      posterCard.style.animation = '';
+    }
     // Start the new trailer (non-blocking)
     if (!heroHoverLock) {
       fetchTrailerId(heroMovies[idx].id).then(key => {
