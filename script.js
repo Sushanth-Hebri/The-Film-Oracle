@@ -1335,6 +1335,8 @@ function startHeroTrailer(videoKey) {
       // ── Create the player for the very first time ──
       heroYTPlayer = new window.YT.Player('heroYTFrame', {
         videoId: videoKey,
+        width: '100%',
+        height: '100%',
         playerVars: {
           autoplay: 1, mute: 1, controls: 0, showinfo: 0,
           rel: 0, modestbranding: 1, iv_load_policy: 3,
@@ -1342,6 +1344,22 @@ function startHeroTrailer(videoKey) {
         },
         events: {
           onReady: (e) => {
+            // YouTube injects inline width/height on the iframe — override with full-cover styles
+            const iframe = e.target.getIframe();
+            if (iframe) {
+              iframe.style.cssText = [
+                'position:absolute',
+                'top:50%',
+                'left:50%',
+                'width:177.78vh',
+                'height:56.25vw',
+                'min-width:100%',
+                'min-height:100%',
+                'transform:translate(-50%,-50%)',
+                'border:none',
+                'pointer-events:none',
+              ].join(';');
+            }
             e.target.setVolume(100);
             if (heroTrailerMuted) e.target.mute(); else e.target.unMute();
             e.target.playVideo();
