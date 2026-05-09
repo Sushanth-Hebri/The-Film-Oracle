@@ -5242,15 +5242,6 @@ body, .modal-sheet, .fav-panel, .cinepanel,
   pointer-events: none;
 }
 /* When trailer is playing, dim the static backdrop slightly */
-#hero.hero-trailer-active .hero-slide.active {
-  opacity: 0.12;
-}
-/* The gradient + vignette remain above the video */
-.hero-gradient,
-.hero-vignette {
-  position: relative;
-  z-index: 1;
-}
 /* Sound toggle button */
 .hero-sound-btn {
   position: absolute;
