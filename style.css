@@ -5217,7 +5217,8 @@ body, .modal-sheet, .fav-panel, .cinepanel,
 .hero-trailer-bg {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  /* Must be above .hero-slides (z-index 0) so video is visible */
+  z-index: 1;
   overflow: hidden;
   pointer-events: none;
   opacity: 0;
@@ -5226,7 +5227,7 @@ body, .modal-sheet, .fav-panel, .cinepanel,
 .hero-trailer-bg.trailer-ready {
   opacity: 1;
 }
-/* #heroYTFrame div must fill the entire trailer background */
+/* #heroYTFrame must fill the entire trailer background container */
 #heroYTFrame {
   position: absolute;
   inset: 0;
