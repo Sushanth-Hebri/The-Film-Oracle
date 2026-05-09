@@ -1013,7 +1013,7 @@ async function loadHero() {
     renderHero(0, false);
     // Fetch & start the first film's trailer (async, non-blocking)
     fetchTrailerId(heroMovies[0].id).then(key => startHeroTrailer(key));
-    heroTimer = setInterval(() => goHero((heroIdx + 1) % count), 9000);
+    heroTimer = setInterval(() => goHero((heroIdx + 1) % count), 14000);
   } catch (e) { console.error('loadHero:', e); }
 }
 
@@ -1070,7 +1070,7 @@ function buildThumbnailStrip(count) {
       });
       // Restart the carousel timer
       const count = Math.min(heroMovies.length, 8);
-      heroTimer = setInterval(() => goHero((heroIdx + 1) % count), 9000);
+      heroTimer = setInterval(() => goHero((heroIdx + 1) % count), 14000);
     });
 
     strip.appendChild(thumb);
@@ -1234,7 +1234,7 @@ heroWatchedBtn.addEventListener('click', () => {
    HERO — YOUTUBE TRAILER SYSTEM
 ============================================= */
 
-// Called by YouTube IFrame API once the script is loaded
+// Called by YouTube IFrame API once script loads
 window.onYouTubeIframeAPIReady = function () {
   _heroYTReady = true;
   _ytReadyCallbacks.forEach(fn => fn());
@@ -1263,113 +1263,111 @@ async function fetchTrailerId(movieId) {
   }
 }
 
-// Clear the skip-play timer
+// ── Skip-play constants (module-level so all functions share them) ──
+const HERO_SKIP_SEC  = 10;  // seconds to jump over
+const HERO_PLAY_SEC  = 10;  // seconds to show (bumped from 5→10)
+const HERO_CYCLE_SEC = HERO_SKIP_SEC + HERO_PLAY_SEC;
+let _heroTrailerCycleStart = HERO_SKIP_SEC;
+
+// ── Helpers: show / hide the trailer background ─────────────────────
+function showTrailerBg() {
+  const heroBg   = document.getElementById('heroTrailerBg');
+  const sndBtn   = document.getElementById('heroSoundBtn');
+  const heroSect = document.getElementById('hero');
+  if (heroBg)   heroBg.classList.add('trailer-ready');
+  if (heroSect) heroSect.classList.add('hero-trailer-active');
+  if (sndBtn)   sndBtn.classList.add('sound-btn-visible');
+}
+
+function hideTrailerBg() {
+  const heroBg   = document.getElementById('heroTrailerBg');
+  const sndBtn   = document.getElementById('heroSoundBtn');
+  const heroSect = document.getElementById('hero');
+  if (heroBg)   heroBg.classList.remove('trailer-ready');
+  if (heroSect) heroSect.classList.remove('hero-trailer-active');
+  if (sndBtn)   sndBtn.classList.remove('sound-btn-visible');
+}
+
+// ── Clear the skip-play interval ────────────────────────────────────
 function clearSkipTimer() {
   if (heroSkipTimer) { clearInterval(heroSkipTimer); heroSkipTimer = null; }
 }
 
-// Start (or swap) the hero trailer. Uses skip-play pattern:
-// seek to startOffset+10, play 5 s, seek to current+10, play 5 s, …
+// ── Skip-play loop (module-level, not nested) ────────────────────────
+function startSkipPlayLoop() {
+  clearSkipTimer();
+  heroSkipTimer = setInterval(() => {
+    if (!heroYTPlayer || !heroYTPlayer.seekTo) return;
+    _heroTrailerCycleStart += HERO_CYCLE_SEC;
+    try {
+      const dur = heroYTPlayer.getDuration() || 9999;
+      if (_heroTrailerCycleStart >= dur - HERO_PLAY_SEC) _heroTrailerCycleStart = HERO_SKIP_SEC;
+      heroYTPlayer.seekTo(_heroTrailerCycleStart, true);
+      heroYTPlayer.playVideo();
+    } catch(e) { /* player not ready */ }
+  }, HERO_PLAY_SEC * 1000);
+}
+
+// ── Start (or swap) the hero trailer ────────────────────────────────
 function startHeroTrailer(videoKey) {
   clearSkipTimer();
-
-  const heroBg = document.getElementById('heroTrailerBg');
-  const soundBtn = document.getElementById('heroSoundBtn');
-  const heroSection = document.getElementById('hero');
+  hideTrailerBg();
 
   if (!videoKey) {
-    // No trailer — ensure video is fully stopped and static backdrop shows normally
-    if (heroBg)      heroBg.classList.remove('trailer-ready');
-    if (heroSection) heroSection.classList.remove('hero-trailer-active');
-    if (soundBtn)    soundBtn.classList.remove('sound-btn-visible');
-    // Also stop the player so no residual frame leaks through
+    // No trailer — stop player and show normal static backdrop
     try { if (heroYTPlayer && heroYTPlayer.stopVideo) heroYTPlayer.stopVideo(); } catch(e) {}
     return;
   }
 
-  const SKIP_SEC  = 10; // seconds to skip over
-  const PLAY_SEC  = 5;  // seconds to show
-  const CYCLE_SEC = SKIP_SEC + PLAY_SEC; // 15 s per cycle
-  let cycleStart  = SKIP_SEC; // first playback position
+  _heroTrailerCycleStart = HERO_SKIP_SEC;
 
-  function setupPlayer() {
+  whenYTReady(() => {
     if (heroYTPlayer && heroYTPlayer.loadVideoById) {
-      // Reuse existing player — just load new video
-      heroYTPlayer.loadVideoById({ videoId: videoKey, startSeconds: cycleStart });
-      heroYTPlayer.setVolume(100);
+      // ── Reuse existing player ── load new video, then show bg after buffer
+      heroYTPlayer.loadVideoById({ videoId: videoKey, startSeconds: _heroTrailerCycleStart });
       if (heroTrailerMuted) heroYTPlayer.mute(); else heroYTPlayer.unMute();
-      triggerSkipPlay();
+      // Show the bg after a short buffer delay so video frame is ready
+      setTimeout(() => {
+        showTrailerBg();
+        startSkipPlayLoop();
+      }, 700);
     } else {
-      // Create a fresh player
+      // ── Create the player for the very first time ──
       heroYTPlayer = new window.YT.Player('heroYTFrame', {
         videoId: videoKey,
         playerVars: {
-          autoplay:   1,
-          mute:       1,           // always start muted for autoplay compliance
-          controls:   0,
-          showinfo:   0,
-          rel:        0,
-          modestbranding: 1,
-          iv_load_policy:  3,
-          disablekb:  1,
-          fs:         0,
-          start:      cycleStart,
+          autoplay: 1, mute: 1, controls: 0, showinfo: 0,
+          rel: 0, modestbranding: 1, iv_load_policy: 3,
+          disablekb: 1, fs: 0, start: _heroTrailerCycleStart,
         },
         events: {
           onReady: (e) => {
             e.target.setVolume(100);
             if (heroTrailerMuted) e.target.mute(); else e.target.unMute();
             e.target.playVideo();
-            if (heroBg) heroBg.classList.add('trailer-ready');
-            if (heroSection) heroSection.classList.add('hero-trailer-active');
-            if (soundBtn) soundBtn.classList.add('sound-btn-visible');
-            triggerSkipPlay();
+            showTrailerBg();
+            startSkipPlayLoop();
           },
           onStateChange: (e) => {
-            // If video ends, loop back to start-pattern position
             if (e.data === window.YT.PlayerState.ENDED) {
-              cycleStart = SKIP_SEC;
-              e.target.seekTo(cycleStart);
-              e.target.playVideo();
+              _heroTrailerCycleStart = HERO_SKIP_SEC;
+              try { e.target.seekTo(_heroTrailerCycleStart, true); e.target.playVideo(); } catch(err) {}
             }
           }
         }
       });
     }
-  }
-
-  function triggerSkipPlay() {
-    clearSkipTimer();
-    // The player is already seeked to cycleStart; let it play for PLAY_SEC
-    heroSkipTimer = setInterval(() => {
-      if (!heroYTPlayer || !heroYTPlayer.seekTo) return;
-      // Advance by CYCLE_SEC from where we started this cycle
-      cycleStart += CYCLE_SEC;
-      try {
-        const duration = heroYTPlayer.getDuration() || 999;
-        if (cycleStart >= duration - PLAY_SEC) cycleStart = SKIP_SEC; // wrap around
-        heroYTPlayer.seekTo(cycleStart, true);
-        heroYTPlayer.playVideo();
-      } catch(e) { /* player not ready */ }
-    }, PLAY_SEC * 1000);
-  }
-
-  whenYTReady(setupPlayer);
+  });
 }
 
-// Stop the hero trailer and hide the bg
+// ── Stop trailer and hide bg ─────────────────────────────────────────
 function stopHeroTrailer() {
   clearSkipTimer();
-  try {
-    if (heroYTPlayer && heroYTPlayer.pauseVideo) heroYTPlayer.pauseVideo();
-  } catch(e) {}
-  const heroBg = document.getElementById('heroTrailerBg');
-  const heroSection = document.getElementById('hero');
-  if (heroBg) heroBg.classList.remove('trailer-ready');
-  if (heroSection) heroSection.classList.remove('hero-trailer-active');
+  hideTrailerBg();
+  try { if (heroYTPlayer && heroYTPlayer.pauseVideo) heroYTPlayer.pauseVideo(); } catch(e) {}
 }
 
-// Sound toggle button
+// ── Sound toggle button ──────────────────────────────────────────────
 const heroSoundBtn = document.getElementById('heroSoundBtn');
 if (heroSoundBtn) {
   heroSoundBtn.addEventListener('click', () => {
@@ -1387,6 +1385,28 @@ if (heroSoundBtn) {
     }
   });
 }
+
+// ── Pause trailer when hero scrolls out of view ──────────────────────
+(function initHeroVisibilityObserver() {
+  const heroEl = document.getElementById('hero');
+  if (!heroEl || !window.IntersectionObserver) return;
+  let _wasVisible = true;
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting && _wasVisible) {
+        // Hero scrolled away — stop trailer
+        _wasVisible = false;
+        stopHeroTrailer();
+      } else if (entry.isIntersecting && !_wasVisible) {
+        // Hero scrolled back — resume trailer for current film
+        _wasVisible = true;
+        const m = heroMovies[heroIdx];
+        if (m) fetchTrailerId(m.id).then(key => { if (key && !heroHoverLock) startHeroTrailer(key); });
+      }
+    });
+  }, { threshold: 0.15 });
+  obs.observe(heroEl);
+})();
 
 /* =============================================
    VIBE FILTER BAR
