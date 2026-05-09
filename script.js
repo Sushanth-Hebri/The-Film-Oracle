@@ -1278,8 +1278,7 @@ function showTrailerBg() {
   if (heroBg)   heroBg.classList.add('trailer-ready');
   if (heroSect) heroSect.classList.add('hero-trailer-active');
   if (sndBtn)   sndBtn.classList.add('sound-btn-visible');
-  if (npCard)   npCard.classList.add('card-visible');
-  updateNowPlayingCard();
+  if (npCard)   { updateNowPlayingCard(); npCard.classList.add('card-visible'); }
 }
 
 function hideTrailerBg() {
@@ -1301,12 +1300,14 @@ function updateNowPlayingCard() {
   const posterEl = document.getElementById('heroNowPlayingPoster');
   if (titleEl)  titleEl.textContent = movie.title || movie.name || '—';
   if (metaEl)   metaEl.textContent  = [toYear(movie.release_date), toRating(movie.vote_average) !== '—' ? '★ ' + toRating(movie.vote_average) : null].filter(Boolean).join(' · ');
-  if (posterEl && movie.poster_path) {
-    posterEl.src = IMG(movie.poster_path, 'w92');
-    posterEl.alt = escHtml(movie.title || '');
-    posterEl.style.display = '';
-  } else if (posterEl) {
-    posterEl.style.display = 'none';
+  if (posterEl) {
+    if (movie.poster_path) {
+      posterEl.src = IMG(movie.poster_path, 'w92');
+      posterEl.alt = movie.title || '';
+      posterEl.style.display = '';
+    } else {
+      posterEl.style.display = 'none';
+    }
   }
 }
 
@@ -1329,21 +1330,6 @@ function startSkipPlayLoop() {
     } catch(e) { /* player not ready */ }
   }, HERO_PLAY_SEC * 1000);
 }
-
-// ── Sync fixed trailer overlay to exactly cover the hero section ────
-function syncTrailerBgToHero() {
-  const heroEl = document.getElementById('hero');
-  const heroBg = document.getElementById('heroTrailerBg');
-  if (!heroEl || !heroBg) return;
-  const r = heroEl.getBoundingClientRect();
-  heroBg.style.top    = r.top  + 'px';
-  heroBg.style.left   = r.left + 'px';
-  heroBg.style.width  = r.width  + 'px';
-  heroBg.style.height = r.height + 'px';
-}
-syncTrailerBgToHero();
-window.addEventListener('scroll', syncTrailerBgToHero, { passive: true });
-window.addEventListener('resize', syncTrailerBgToHero, { passive: true });
 
 // ── Start (or swap) the hero trailer ────────────────────────────────
 function startHeroTrailer(videoKey) {
