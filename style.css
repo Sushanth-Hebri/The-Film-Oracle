@@ -5095,3 +5095,203 @@ body, .modal-sheet, .fav-panel, .cinepanel,
   #scatterCanvas { height: 300px; }
   #locMapCanvas { height: 240px; }
 }
+/* ============================================================
+   GSAP ANIMATION SUPPORT
+============================================================ */
+
+/* Perspective context for hero poster 3D parallax */
+#hero {
+  perspective: 1200px;
+}
+
+#heroPosterCard {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+#heroContent {
+  will-change: transform;
+}
+
+/* Prevent pill bars from clipping during horizontal parallax drift */
+#vibeFilterBar,
+#runtimeFilterBar {
+  overflow: visible;
+}
+
+.vibe-bar-inner,
+.runtime-bar-inner {
+  overflow: visible;
+}
+
+/* Give Director's Cut inner a transform origin for scale entrance */
+.dc-inner {
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+/* Mood buttons: ensure they can scale from 0 without layout shift */
+.mood-grid {
+  perspective: 800px;
+}
+
+.mood-btn {
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+
+/* Decade & region pills: overflow visible for drift */
+.decade-section .decade-inner,
+.world-cinema-section .world-cinema-inner {
+  overflow: visible;
+}
+
+/* ============================================================
+   VIVUS + GSAP — CINEMATIC FILM FRAME (Director's Cut)
+============================================================ */
+.directors-cut {
+  position: relative;
+  overflow: hidden;
+}
+
+.dc-inner {
+  position: relative;
+}
+
+.dc-film-frame-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.dc-film-frame-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* All paths start invisible — Vivus/GSAP reveals them */
+}
+
+/* All stroked elements start hidden — Vivus draws them */
+.dc-film-frame-svg .ff-outer,
+.dc-film-frame-svg .ff-inner,
+.dc-film-frame-svg .ff-corner,
+.dc-film-frame-svg .ff-sprocket,
+.dc-film-frame-svg .ff-divider,
+.dc-film-frame-svg .ff-reticle-outer,
+.dc-film-frame-svg .ff-reticle-mid,
+.dc-film-frame-svg .ff-reticle-inner,
+.dc-film-frame-svg .ff-reticle-pupil,
+.dc-film-frame-svg .ff-dot,
+.dc-film-frame-svg .ff-cross,
+.dc-film-frame-svg .ff-tick {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+}
+
+/* Text and scanline are GSAP-only (not Vivus) */
+.dc-film-frame-svg .ff-code {
+  opacity: 0;
+}
+
+.dc-film-frame-svg .ff-scanline {
+  opacity: 0;
+}
+
+/* Content sits above the frame overlay */
+.dc-label,
+.dc-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Subtle glow on the outer frame once drawn */
+.dc-film-frame-svg .ff-outer.drawn {
+  filter: drop-shadow(0 0 4px rgba(0, 229, 204, 0.25));
+}
+
+/* =============================================
+   HERO TRAILER BACKGROUND
+============================================= */
+.hero-trailer-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.hero-trailer-bg.trailer-ready {
+  opacity: 1;
+}
+/* The YouTube iframe must fill the container and be centered */
+.hero-trailer-bg iframe,
+#heroYTFrame iframe {
+  position: absolute;
+  /* Oversized to maintain 16:9 and cover any viewport */
+  width: 177.78vh;   /* 16/9 * 100vh */
+  height: 56.25vw;   /* 9/16 * 100vw */
+  min-width: 100%;
+  min-height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: none;
+  pointer-events: none;
+}
+/* When trailer is playing, dim the static backdrop slightly */
+#hero.hero-trailer-active .hero-slide.active {
+  opacity: 0.12;
+}
+/* The gradient + vignette remain above the video */
+.hero-gradient,
+.hero-vignette {
+  position: relative;
+  z-index: 1;
+}
+/* Sound toggle button */
+.hero-sound-btn {
+  position: absolute;
+  bottom: 96px;    /* just above the thumbnail strip */
+  right: 24px;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(8,8,16,0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s, opacity 0.3s;
+  opacity: 0;
+  pointer-events: none;
+}
+.hero-sound-btn.sound-btn-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.hero-sound-btn:hover {
+  background: rgba(0,229,204,0.18);
+  border-color: rgba(0,229,204,0.55);
+  transform: scale(1.1);
+}
+.hero-sound-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+/* Thumbnail hover — show a tiny "preview" indicator */
+.hero-thumb.hover-preview {
+  border-color: rgba(0,229,204,0.6);
+  box-shadow: 0 0 12px rgba(0,229,204,0.25);
+}
+.hero-thumb.hover-preview .hero-thumb-overlay {
+  opacity: 0;
+}
