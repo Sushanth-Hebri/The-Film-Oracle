@@ -1274,18 +1274,40 @@ function showTrailerBg() {
   const heroBg   = document.getElementById('heroTrailerBg');
   const sndBtn   = document.getElementById('heroSoundBtn');
   const heroSect = document.getElementById('hero');
+  const npCard   = document.getElementById('heroNowPlayingCard');
   if (heroBg)   heroBg.classList.add('trailer-ready');
   if (heroSect) heroSect.classList.add('hero-trailer-active');
   if (sndBtn)   sndBtn.classList.add('sound-btn-visible');
+  if (npCard)   npCard.classList.add('card-visible');
+  updateNowPlayingCard();
 }
 
 function hideTrailerBg() {
   const heroBg   = document.getElementById('heroTrailerBg');
   const sndBtn   = document.getElementById('heroSoundBtn');
   const heroSect = document.getElementById('hero');
+  const npCard   = document.getElementById('heroNowPlayingCard');
   if (heroBg)   heroBg.classList.remove('trailer-ready');
   if (heroSect) heroSect.classList.remove('hero-trailer-active');
   if (sndBtn)   sndBtn.classList.remove('sound-btn-visible');
+  if (npCard)   npCard.classList.remove('card-visible');
+}
+
+function updateNowPlayingCard() {
+  const movie = heroMovies.find(m => m.id === heroCurrentId) || heroMovies[heroIdx];
+  if (!movie) return;
+  const titleEl  = document.getElementById('heroNowPlayingTitle');
+  const metaEl   = document.getElementById('heroNowPlayingMeta');
+  const posterEl = document.getElementById('heroNowPlayingPoster');
+  if (titleEl)  titleEl.textContent = movie.title || movie.name || '—';
+  if (metaEl)   metaEl.textContent  = [toYear(movie.release_date), toRating(movie.vote_average) !== '—' ? '★ ' + toRating(movie.vote_average) : null].filter(Boolean).join(' · ');
+  if (posterEl && movie.poster_path) {
+    posterEl.src = IMG(movie.poster_path, 'w92');
+    posterEl.alt = escHtml(movie.title || '');
+    posterEl.style.display = '';
+  } else if (posterEl) {
+    posterEl.style.display = 'none';
+  }
 }
 
 // ── Clear the skip-play interval ────────────────────────────────────
