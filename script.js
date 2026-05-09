@@ -1,5 +1,17 @@
 'use strict';
 
+// Helper: scroll page to a Y position (native smooth)
+function pageScrollTo(y) {
+  window.scrollTo({ top: y, behavior: 'smooth' });
+}
+
+// Helper: scroll page to an element (native smooth)
+function pageScrollToEl(el, offset = 0) {
+  const y = el.getBoundingClientRect().top + window.scrollY + offset;
+  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+}
+
+
 /* =============================================
    CONFIG & STATE
 ============================================= */
@@ -43,6 +55,14 @@ let heroMovies     = [];
 let heroIdx        = 0;
 let heroTimer      = null;
 let heroCurrentId  = null;
+// Trailer state
+let heroYTPlayer      = null;
+let heroTrailerMuted  = true;   // start muted (autoplay policy)
+let heroTrailerMap    = {};     // movieId → YouTube video key
+let heroSkipTimer     = null;   // manages the skip-play interval
+let heroHoverLock     = false;  // true while user hovers a thumb
+let _heroYTReady      = false;  // true once YouTube IFrame API fires
+let _ytReadyCallbacks = [];
 let compareMode    = false;
 let compareItems   = [null, null];
 let _lastModalDetails = null;
@@ -507,7 +527,7 @@ window.addEventListener('scroll', () => {
   if (btt) btt.classList.toggle('visible', window.scrollY > 500);
 }, { passive: true });
 
-$('backToTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+$('backToTop').addEventListener('click', () => pageScrollTo(0));
 
 /* =============================================
    TOAST NOTIFICATIONS
@@ -707,7 +727,7 @@ document.querySelectorAll('.nav-link, .mobile-nav-item, .footer-links a').forEac
     if (!target) return;
     e.preventDefault();
     const y = target.getBoundingClientRect().top + window.scrollY - header.offsetHeight - 8;
-    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    pageScrollTo(Math.max(0, y));
     // Close mobile nav
     mobileNav.classList.add('hidden');
     mobileMenuBtn.classList.remove('open');
@@ -723,7 +743,7 @@ document.querySelectorAll('.nav-link, .mobile-nav-item, .footer-links a').forEac
 
 $('logoLink').addEventListener('click', e => {
   e.preventDefault();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  pageScrollTo(0);
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
   const homeLink = document.querySelector('.nav-link[href="#hero"]');
   if (homeLink) { homeLink.classList.add('active'); updateNavIndicator(homeLink); }
@@ -991,6 +1011,8 @@ async function loadHero() {
     buildThumbnailStrip(count);
 
     renderHero(0, false);
+    // Fetch & start the first film's trailer (async, non-blocking)
+    fetchTrailerId(heroMovies[0].id).then(key => startHeroTrailer(key));
     heroTimer = setInterval(() => goHero((heroIdx + 1) % count), 9000);
   } catch (e) { console.error('loadHero:', e); }
 }
@@ -1010,6 +1032,47 @@ function buildThumbnailStrip(count) {
       <span class="hero-thumb-num">${String(i + 1).padStart(2, '0')}</span>
     `;
     thumb.addEventListener('click', () => goHero(i));
+
+    // Hover → stop auto-carousel, play this film's trailer
+    thumb.addEventListener('mouseenter', () => {
+      // Stop the auto-carousel
+      if (heroTimer) { clearInterval(heroTimer); heroTimer = null; }
+      heroHoverLock = true;
+      thumb.classList.add('hover-preview');
+
+      // Show this slide immediately without full transition
+      document.querySelectorAll('.hero-slide').forEach((s, si) =>
+        s.classList.toggle('active', si === i)
+      );
+      document.querySelectorAll('.hero-thumb').forEach((t, ti) =>
+        t.classList.toggle('active', ti === i)
+      );
+
+      // Play this film's trailer
+      fetchTrailerId(m.id).then(key => {
+        if (heroHoverLock) startHeroTrailer(key);
+      });
+    });
+
+    thumb.addEventListener('mouseleave', () => {
+      thumb.classList.remove('hover-preview');
+      heroHoverLock = false;
+      // Restore the main carousel at current heroIdx
+      document.querySelectorAll('.hero-slide').forEach((s, si) =>
+        s.classList.toggle('active', si === heroIdx)
+      );
+      document.querySelectorAll('.hero-thumb').forEach((t, ti) =>
+        t.classList.toggle('active', ti === heroIdx)
+      );
+      // Resume trailer for the current slide
+      fetchTrailerId(heroMovies[heroIdx].id).then(key => {
+        if (!heroHoverLock) startHeroTrailer(key);
+      });
+      // Restart the carousel timer
+      const count = Math.min(heroMovies.length, 8);
+      heroTimer = setInterval(() => goHero((heroIdx + 1) % count), 9000);
+    });
+
     strip.appendChild(thumb);
   }
 }
@@ -1017,6 +1080,8 @@ function buildThumbnailStrip(count) {
 function goHero(idx) {
   if (heroTransitionBusy || idx === heroIdx) return;
   heroTransitionBusy = true;
+  // Stop the current trailer before transitioning
+  stopHeroTrailer();
 
   const prevIdx = heroIdx;
   heroIdx = idx;
@@ -1055,6 +1120,12 @@ function goHero(idx) {
     renderHero(idx, true);
     if (content) content.classList.remove('transitioning');
     if (posterCard) posterCard.classList.remove('transitioning');
+    // Start the new trailer (non-blocking)
+    if (!heroHoverLock) {
+      fetchTrailerId(heroMovies[idx].id).then(key => {
+        if (!heroHoverLock) startHeroTrailer(key);
+      });
+    }
     // Clean up prev after transition
     setTimeout(() => {
       slides.forEach((s, i) => { if (i === prevIdx) s.classList.remove('prev'); });
@@ -1158,6 +1229,164 @@ heroWatchedBtn.addEventListener('click', () => {
   updateHeroWatchedBtn(heroCurrentId);
   refreshCardWatchedState(heroCurrentId);
 });
+
+/* =============================================
+   HERO — YOUTUBE TRAILER SYSTEM
+============================================= */
+
+// Called by YouTube IFrame API once the script is loaded
+window.onYouTubeIframeAPIReady = function () {
+  _heroYTReady = true;
+  _ytReadyCallbacks.forEach(fn => fn());
+  _ytReadyCallbacks = [];
+};
+
+function whenYTReady(fn) {
+  if (_heroYTReady && window.YT && window.YT.Player) fn();
+  else _ytReadyCallbacks.push(fn);
+}
+
+// Fetch & cache a YouTube trailer key for a movie
+async function fetchTrailerId(movieId) {
+  if (heroTrailerMap[movieId] !== undefined) return heroTrailerMap[movieId];
+  try {
+    const data = await apiFetch(`/movie/${movieId}/videos`);
+    const vid = (data.results || [])
+      .filter(v => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'))
+      .sort((a, b) => (b.type === 'Trailer') - (a.type === 'Trailer'))[0];
+    const key = vid ? vid.key : null;
+    heroTrailerMap[movieId] = key;
+    return key;
+  } catch (e) {
+    heroTrailerMap[movieId] = null;
+    return null;
+  }
+}
+
+// Clear the skip-play timer
+function clearSkipTimer() {
+  if (heroSkipTimer) { clearInterval(heroSkipTimer); heroSkipTimer = null; }
+}
+
+// Start (or swap) the hero trailer. Uses skip-play pattern:
+// seek to startOffset+10, play 5 s, seek to current+10, play 5 s, …
+function startHeroTrailer(videoKey) {
+  clearSkipTimer();
+
+  const heroBg = document.getElementById('heroTrailerBg');
+  const soundBtn = document.getElementById('heroSoundBtn');
+  const heroSection = document.getElementById('hero');
+
+  if (!videoKey) {
+    // No trailer — ensure video is fully stopped and static backdrop shows normally
+    if (heroBg)      heroBg.classList.remove('trailer-ready');
+    if (heroSection) heroSection.classList.remove('hero-trailer-active');
+    if (soundBtn)    soundBtn.classList.remove('sound-btn-visible');
+    // Also stop the player so no residual frame leaks through
+    try { if (heroYTPlayer && heroYTPlayer.stopVideo) heroYTPlayer.stopVideo(); } catch(e) {}
+    return;
+  }
+
+  const SKIP_SEC  = 10; // seconds to skip over
+  const PLAY_SEC  = 5;  // seconds to show
+  const CYCLE_SEC = SKIP_SEC + PLAY_SEC; // 15 s per cycle
+  let cycleStart  = SKIP_SEC; // first playback position
+
+  function setupPlayer() {
+    if (heroYTPlayer && heroYTPlayer.loadVideoById) {
+      // Reuse existing player — just load new video
+      heroYTPlayer.loadVideoById({ videoId: videoKey, startSeconds: cycleStart });
+      heroYTPlayer.setVolume(100);
+      if (heroTrailerMuted) heroYTPlayer.mute(); else heroYTPlayer.unMute();
+      triggerSkipPlay();
+    } else {
+      // Create a fresh player
+      heroYTPlayer = new window.YT.Player('heroYTFrame', {
+        videoId: videoKey,
+        playerVars: {
+          autoplay:   1,
+          mute:       1,           // always start muted for autoplay compliance
+          controls:   0,
+          showinfo:   0,
+          rel:        0,
+          modestbranding: 1,
+          iv_load_policy:  3,
+          disablekb:  1,
+          fs:         0,
+          start:      cycleStart,
+        },
+        events: {
+          onReady: (e) => {
+            e.target.setVolume(100);
+            if (heroTrailerMuted) e.target.mute(); else e.target.unMute();
+            e.target.playVideo();
+            if (heroBg) heroBg.classList.add('trailer-ready');
+            if (heroSection) heroSection.classList.add('hero-trailer-active');
+            if (soundBtn) soundBtn.classList.add('sound-btn-visible');
+            triggerSkipPlay();
+          },
+          onStateChange: (e) => {
+            // If video ends, loop back to start-pattern position
+            if (e.data === window.YT.PlayerState.ENDED) {
+              cycleStart = SKIP_SEC;
+              e.target.seekTo(cycleStart);
+              e.target.playVideo();
+            }
+          }
+        }
+      });
+    }
+  }
+
+  function triggerSkipPlay() {
+    clearSkipTimer();
+    // The player is already seeked to cycleStart; let it play for PLAY_SEC
+    heroSkipTimer = setInterval(() => {
+      if (!heroYTPlayer || !heroYTPlayer.seekTo) return;
+      // Advance by CYCLE_SEC from where we started this cycle
+      cycleStart += CYCLE_SEC;
+      try {
+        const duration = heroYTPlayer.getDuration() || 999;
+        if (cycleStart >= duration - PLAY_SEC) cycleStart = SKIP_SEC; // wrap around
+        heroYTPlayer.seekTo(cycleStart, true);
+        heroYTPlayer.playVideo();
+      } catch(e) { /* player not ready */ }
+    }, PLAY_SEC * 1000);
+  }
+
+  whenYTReady(setupPlayer);
+}
+
+// Stop the hero trailer and hide the bg
+function stopHeroTrailer() {
+  clearSkipTimer();
+  try {
+    if (heroYTPlayer && heroYTPlayer.pauseVideo) heroYTPlayer.pauseVideo();
+  } catch(e) {}
+  const heroBg = document.getElementById('heroTrailerBg');
+  const heroSection = document.getElementById('hero');
+  if (heroBg) heroBg.classList.remove('trailer-ready');
+  if (heroSection) heroSection.classList.remove('hero-trailer-active');
+}
+
+// Sound toggle button
+const heroSoundBtn = document.getElementById('heroSoundBtn');
+if (heroSoundBtn) {
+  heroSoundBtn.addEventListener('click', () => {
+    heroTrailerMuted = !heroTrailerMuted;
+    const iconMuted = heroSoundBtn.querySelector('.sound-icon-muted');
+    const iconOn    = heroSoundBtn.querySelector('.sound-icon-on');
+    if (heroTrailerMuted) {
+      try { heroYTPlayer && heroYTPlayer.mute(); } catch(e) {}
+      if (iconMuted) iconMuted.style.display = '';
+      if (iconOn)    iconOn.style.display    = 'none';
+    } else {
+      try { heroYTPlayer && heroYTPlayer.unMute(); } catch(e) {}
+      if (iconMuted) iconMuted.style.display = 'none';
+      if (iconOn)    iconOn.style.display    = '';
+    }
+  });
+}
 
 /* =============================================
    VIBE FILTER BAR
