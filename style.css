@@ -5213,11 +5213,15 @@ body, .modal-sheet, .fav-panel, .cinepanel,
 
 /* =============================================
    HERO TRAILER BACKGROUND
+   position:fixed so it escapes #hero's overflow:hidden and perspective.
+   JS sizes it to exactly match the hero section's bounding rect.
 ============================================= */
 .hero-trailer-bg {
-  position: absolute;
-  inset: 0;
-  /* Must be above .hero-slides (z-index 0) so video is visible */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* Below header (z 900) and all modals, above page content */
   z-index: 1;
   overflow: hidden;
   pointer-events: none;
@@ -5227,26 +5231,30 @@ body, .modal-sheet, .fav-panel, .cinepanel,
 .hero-trailer-bg.trailer-ready {
   opacity: 1;
 }
-/* #heroYTFrame must fill the entire trailer background container */
+/* #heroYTFrame is replaced by YouTube with an iframe — fill the container */
 #heroYTFrame {
   position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-/* The YouTube iframe must fill the container and be centered.
-   Use !important to override YouTube's injected inline width/height attributes */
-.hero-trailer-bg iframe,
-#heroYTFrame iframe,
-#heroYTFrame {
-  position: absolute !important;
-  /* Oversized to maintain 16:9 and cover any viewport */
-  width: 177.78vh !important;   /* 16/9 * 100vh */
-  height: 56.25vw !important;   /* 9/16 * 100vw */
-  min-width: 100% !important;
-  min-height: 100% !important;
   top: 50% !important;
   left: 50% !important;
+  /* 16:9 cover: whichever dimension is larger wins */
+  width: 177.78vh !important;
+  height: 56.25vw !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  transform: translate(-50%, -50%) !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+/* Also target the iframe YouTube injects inside #heroYTFrame (if it nests) */
+.hero-trailer-bg iframe,
+#heroYTFrame iframe {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 177.78vh !important;
+  height: 56.25vw !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
   transform: translate(-50%, -50%) !important;
   border: none !important;
   pointer-events: none !important;
