@@ -2,7 +2,7 @@
 
 **The Film Oracle** is an intelligent movie exploration platform designed to transform how audiences discover cinema.
 
-Instead of endlessly scrolling, users explore films through interactive tools, curated categories, mood-based matching, and global market discovery — all within one unified experience.
+Instead of endlessly scrolling, users explore films through interactive tools, curated categories, mood-based matching, and global market discovery - all within one unified experience.
 
 🔗 **Live Demo:**  
 https://sushanth-hebri.github.io/The-Film-Oracle/
