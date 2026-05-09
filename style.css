@@ -196,7 +196,7 @@
 }
 .hero-layout {
   position: relative;
-  z-index: 2;
+  z-index: 5;
   display: flex;
   align-items: flex-end;
   gap: 48px;
@@ -380,7 +380,7 @@
   position: absolute;
   bottom: 32px;
   left: 60px; right: 60px;
-  z-index: 10;
+  z-index: 15;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -1347,19 +1347,19 @@ img { display: block; max-width: 100%; }
 }
 
 .hero-gradient {
-  position: absolute; inset: 0; z-index: 1;
+  position: absolute; inset: 0; z-index: 3;
   background:
     linear-gradient(105deg, rgba(10,10,14,0.96) 0%, rgba(10,10,14,0.55) 45%, rgba(10,10,14,0.1) 70%),
     linear-gradient(to top, rgba(10,10,14,1) 0%, rgba(10,10,14,0.7) 25%, transparent 60%);
 }
 .hero-vignette {
-  position: absolute; inset: 0; z-index: 1;
+  position: absolute; inset: 0; z-index: 3;
   background: radial-gradient(ellipse at 75% 50%, transparent 30%, rgba(10,10,14,0.5) 100%);
 }
 
 /* Main layout: info left, poster right */
 .hero-layout {
-  position: relative; z-index: 2;
+  position: relative; z-index: 5;
   display: grid;
   grid-template-columns: 1fr 320px;
   align-items: end;
@@ -5213,16 +5213,15 @@ body, .modal-sheet, .fav-panel, .cinepanel,
 
 /* =============================================
    HERO TRAILER BACKGROUND
-   position:fixed so it escapes #hero's overflow:hidden and perspective.
-   JS sizes it to exactly match the hero section's bounding rect.
+   Now position:absolute inside #hero so it shares
+   the same stacking context as the strip, sound btn,
+   and now-playing card — z-index works correctly.
 ============================================= */
 .hero-trailer-bg {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  /* Below header (z 900) and all modals, above page content */
-  z-index: 1;
+  position: absolute;
+  inset: 0;
+  /* Sits above hero-slides (z:0) but below all controls */
+  z-index: 2;
   overflow: hidden;
   pointer-events: none;
   opacity: 0;
@@ -5236,7 +5235,6 @@ body, .modal-sheet, .fav-panel, .cinepanel,
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
-  /* 16:9 cover: whichever dimension is larger wins */
   width: 177.78vh !important;
   height: 56.25vw !important;
   min-width: 100% !important;
@@ -5245,7 +5243,7 @@ body, .modal-sheet, .fav-panel, .cinepanel,
   border: none !important;
   pointer-events: none !important;
 }
-/* Also target the iframe YouTube injects inside #heroYTFrame (if it nests) */
+/* Also target the iframe YouTube injects inside #heroYTFrame */
 .hero-trailer-bg iframe,
 #heroYTFrame iframe {
   position: absolute !important;
@@ -5259,13 +5257,14 @@ body, .modal-sheet, .fav-panel, .cinepanel,
   border: none !important;
   pointer-events: none !important;
 }
-/* When trailer is playing, dim the static backdrop slightly */
-/* Sound toggle button */
+
+/* ── SOUND TOGGLE BUTTON ──────────────────────── */
+/* z-index 20 — above trailer (2), overlay (3), layout (2), strip (10) */
 .hero-sound-btn {
   position: absolute;
-  bottom: 108px;   /* above the thumbnail strip */
+  bottom: 108px;   /* sits above the thumbnail strip */
   right: 60px;
-  z-index: 12;
+  z-index: 20;
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -5297,26 +5296,26 @@ body, .modal-sheet, .fav-panel, .cinepanel,
   flex-shrink: 0;
 }
 
-/* ── NOW-PLAYING FILM CARD (shown over trailer) ── */
+/* ── NOW-PLAYING FILM CARD ───────────────────── */
 .hero-now-playing-card {
   position: absolute;
   bottom: 108px;
   left: 60px;
-  z-index: 12;
+  z-index: 20;
   display: flex;
   align-items: center;
   gap: 12px;
   background: rgba(8,8,16,0.82);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0,229,204,0.22);
+  border: 1px solid rgba(0,229,204,0.25);
   border-radius: 12px;
   padding: 10px 14px 10px 10px;
+  max-width: 280px;
   opacity: 0;
   pointer-events: none;
+  transform: translateY(8px);
   transition: opacity 0.4s ease, transform 0.4s ease;
-  transform: translateY(6px);
-  max-width: 280px;
 }
 .hero-now-playing-card.card-visible {
   opacity: 1;
@@ -5324,25 +5323,17 @@ body, .modal-sheet, .fav-panel, .cinepanel,
   transform: translateY(0);
 }
 .hero-now-playing-poster {
-  width: 40px;
-  height: 60px;
+  width: 38px;
+  height: 56px;
   object-fit: cover;
   border-radius: 6px;
   flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.hero-now-playing-poster-placeholder {
-  width: 40px;
-  height: 60px;
-  border-radius: 6px;
-  flex-shrink: 0;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 .hero-now-playing-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 .hero-now-playing-label {
@@ -5355,34 +5346,37 @@ body, .modal-sheet, .fav-panel, .cinepanel,
   align-items: center;
   gap: 5px;
 }
-.hero-now-playing-label::before {
-  content: '';
+.hero-now-playing-dot {
   width: 5px; height: 5px;
   background: var(--teal);
   border-radius: 50%;
-  animation: npPulse 1.4s ease-in-out infinite;
   flex-shrink: 0;
+  animation: npPulse 1.4s ease-in-out infinite;
 }
 @keyframes npPulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(0.7); }
+  50%       { opacity: 0.35; transform: scale(0.65); }
 }
 .hero-now-playing-title {
   font-family: 'DM Mono', monospace;
   font-size: 12px;
-  color: var(--cream);
   font-weight: 500;
+  color: var(--cream);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 180px;
 }
 .hero-now-playing-meta {
   font-family: 'DM Mono', monospace;
   font-size: 10px;
   color: var(--text-muted);
-  white-space: nowrap;
 }
-/* Thumbnail hover — show a tiny "preview" indicator */
+
+/* ── HERO STRIP — always above trailer ───────── */
+/* z-index 15 keeps it above the trailer layer (2) */
+
+/* Thumbnail hover indicator */
 .hero-thumb.hover-preview {
   border-color: rgba(0,229,204,0.6);
   box-shadow: 0 0 12px rgba(0,229,204,0.25);
