@@ -1048,9 +1048,6 @@ function buildThumbnailStrip(count) {
         t.classList.toggle('active', ti === i)
       );
 
-      // Update poster card and hero content to reflect the hovered film
-      renderHero(i, false);
-
       // Play this film's trailer
       fetchTrailerId(m.id).then(key => {
         if (heroHoverLock) startHeroTrailer(key);
@@ -1067,10 +1064,6 @@ function buildThumbnailStrip(count) {
       document.querySelectorAll('.hero-thumb').forEach((t, ti) =>
         t.classList.toggle('active', ti === heroIdx)
       );
-
-      // Restore poster card and hero content to current slide
-      renderHero(heroIdx, false);
-
       // Resume trailer for the current slide
       fetchTrailerId(heroMovies[heroIdx].id).then(key => {
         if (!heroHoverLock) startHeroTrailer(key);
@@ -1126,14 +1119,7 @@ function goHero(idx) {
   setTimeout(() => {
     renderHero(idx, true);
     if (content) content.classList.remove('transitioning');
-    if (posterCard) {
-      posterCard.classList.remove('transitioning');
-      // Force reflow so the browser re-runs the posterCardIn animation
-      void posterCard.offsetWidth;
-      posterCard.style.animation = 'none';
-      void posterCard.offsetWidth;
-      posterCard.style.animation = '';
-    }
+    if (posterCard) posterCard.classList.remove('transitioning');
     // Start the new trailer (non-blocking)
     if (!heroHoverLock) {
       fetchTrailerId(heroMovies[idx].id).then(key => {
@@ -1408,17 +1394,32 @@ if (heroSoundBtn) {
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (!entry.isIntersecting && _wasVisible) {
-        // Hero scrolled away — stop trailer
+        // Hero scrolled away — pause trailer & hide bg
         _wasVisible = false;
-        stopHeroTrailer();
+        clearSkipTimer();
+        hideTrailerBg();
+        try { if (heroYTPlayer && heroYTPlayer.pauseVideo) heroYTPlayer.pauseVideo(); } catch(e) {}
       } else if (entry.isIntersecting && !_wasVisible) {
         // Hero scrolled back — resume trailer for current film
         _wasVisible = true;
         const m = heroMovies[heroIdx];
-        if (m) fetchTrailerId(m.id).then(key => { if (key && !heroHoverLock) startHeroTrailer(key); });
+        if (!m) return;
+        // If player exists and has a loaded video, just resume playback
+        if (heroYTPlayer && heroYTPlayer.playVideo) {
+          try {
+            heroYTPlayer.playVideo();
+            showTrailerBg();
+            startSkipPlayLoop();
+          } catch(e) {
+            // Player not ready — reload trailer
+            fetchTrailerId(m.id).then(key => { if (key && !heroHoverLock) startHeroTrailer(key); });
+          }
+        } else {
+          fetchTrailerId(m.id).then(key => { if (key && !heroHoverLock) startHeroTrailer(key); });
+        }
       }
     });
-  }, { threshold: 0.15 });
+  }, { threshold: 0.1 });
   obs.observe(heroEl);
 })();
 
